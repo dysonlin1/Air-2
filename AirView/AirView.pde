@@ -24,6 +24,7 @@
 // 2016-12-09 16:04 UTC+8 V3.0.4 Set compressionRatio to 128.
 // 2016-12-10 10:50 UTC+8 V3.0.5 Change int to float.
 // 2016-12-10 17:41 UTC+8 V3.0.6 Plot Mean Graph only.
+// 2016-12-22 12:06 UTC+8 V3.0.7 Set window title to show version number.
 
 
 import processing.serial.*;
@@ -100,6 +101,11 @@ boolean mouseInZoomArea(int x, int y)
 
 void setup()
 {
+  String titleString = "AirView V3.0.7";
+  
+  // Set window title to show version number
+  surface.setTitle(titleString);
+  
   size(1200, 800);
   surface.setResizable(true);
 
