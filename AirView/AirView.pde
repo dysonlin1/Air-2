@@ -25,9 +25,10 @@
 // 2016-12-10 10:50 UTC+8 V3.0.5 Change int to float.
 // 2016-12-10 17:41 UTC+8 V3.0.6 Plot Mean Graph only.
 // 2016-12-22 12:06 UTC+8 V3.0.7 Set window title to show version number.
-
+// 2016-12-22 12:25 UTC+8 AirView V3.0.8 Change y-axis captions from int to float.
 
 import processing.serial.*;
+String titleString = "AirView V3.0.8";
 
 int startTime = 0;
 int currentTime = 0;
@@ -101,8 +102,6 @@ boolean mouseInZoomArea(int x, int y)
 
 void setup()
 {
-  String titleString = "AirView V3.0.7";
-  
   // Set window title to show version number
   surface.setTitle(titleString);
   
@@ -152,7 +151,8 @@ void draw()
   fill(255);
 
   // Set the location of graph
-  graphLeft = 50;
+  graphLeft = 80;
+  //graphLeft = 50;
   graphRight = width - 50;
   graphTop = 50;
   graphBottom = height - 100;
@@ -198,7 +198,8 @@ void plotData(int leftBorder, int rightBorder, int bottomBorder, int topBorder) 
 void plotSelectRange()
 {
   // Set the location of graph
-  selectRangeLeft = 100;
+  selectRangeLeft = graphLeft + 50;
+  //selectRangeLeft = 100;
   selectRangeRight = width - 100;
   selectRangeBottom = height - 15;
   selectRangeTop = height - 48;
@@ -247,13 +248,14 @@ void plotAxes() {
   stroke(0, 128, 0);
   line(graphLeft, graphBottom, graphLeft, graphTop); 
   textAlign(RIGHT);
-  //minVoltage = map(minData, -1023, 1023, -5000, 5000);
+  
   minVoltage = minData;
-  text(round(minVoltage), graphLeft - textSize/2, graphBottom);
+  text(minVoltage, graphLeft - textSize/2, graphBottom);
+  //text(round(minVoltage), graphLeft - textSize/2, graphBottom);
 
-  //maxVoltage = map(maxData, -1023, 1023, -5000, 5000);
   maxVoltage = maxData;
-  text(round(maxVoltage), graphLeft - textSize/2, graphTop + textSize);
+  text(maxVoltage, graphLeft - textSize/2, graphTop + textSize);
+  //text(round(maxVoltage), graphLeft - textSize/2, graphTop + textSize);
 
   textAlign(CENTER);
   text(timeStringStart, graphLeft, graphBottom + textSize*1.5);
