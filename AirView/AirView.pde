@@ -27,9 +27,10 @@
 // 2016-12-22 12:06 UTC+8 AirView V3.0.7 Set window title to show version number.
 // 2016-12-22 12:25 UTC+8 AirView V3.0.8 Change y-axis captions from int to float.
 // 2016-12-27 20:47 UTC+8 AirView V3.0.9 Change x and y axes to a box.
+// 2016-12-28 02:45 UTC+8 AirView V3.1.0 Plot central line for y axis.
 
 import processing.serial.*;
-String titleString = "AirView V3.0.9";
+String titleString = "AirView V3.1.0";
 
 int startTime = 0;
 int currentTime = 0;
@@ -51,7 +52,7 @@ int selectRangeBottom = 0;
 
 int isFirstRead = 1;
 
-float maxData = 0;
+float maxData = 1;
 float minData = 0;
 
 int maxTime = 0;
@@ -148,8 +149,8 @@ void setTimeStamp()
 void draw()
 {
   background(0);  // black background
-  //stroke(255);
-  //fill(255);
+  stroke(0);
+  fill(0);
 
   // Set the location of graph
   graphLeft = 80;
@@ -159,11 +160,11 @@ void draw()
   graphBottom = height - 100;
   maxTime = graphRight - graphLeft;
 
-  //background(0);
   setTimeStamp();
   plotSelectRange();
   plotAxes();
-  plotData(graphLeft+3, graphRight, graphBottom-3, graphTop);
+  plotData(graphLeft, graphRight, graphBottom, graphTop);
+  //plotData(graphLeft+3, graphRight, graphBottom-3, graphTop);
 }
 
 
@@ -172,18 +173,22 @@ void plotData(int leftBorder, int rightBorder, int bottomBorder, int topBorder) 
   float y1 = 0;
   float x2 = 0;
   float y2 = 0;
+  
+  stroke(255); // white
 
-  if (dataNumber < 2) {
+  if (dataNumber < 1) {
     return;
   }
-
-  stroke(255); // white
-  fill(255); // white
+  
+  if (dataNumber == 1) {
+    point(leftBorder, bottomBorder);
+    return;
+  }
 
   // set first point
   x1 = leftBorder;
   y1 = map(data[0], minData, maxData, bottomBorder, topBorder);
-
+  
   // plot lines
   for (int i=1; i<dataNumber; i++)
   {
@@ -210,7 +215,7 @@ void plotSelectRange()
 
   stroke(0, 128, 0, 128);
   fill(0, 128, 0, 128);
- rect(selectRangeLeft, selectRangeTop, selectRangeRight - selectRangeLeft, selectRangeBottom - selectRangeTop);
+  rect(selectRangeLeft, selectRangeTop, selectRangeRight - selectRangeLeft, selectRangeBottom - selectRangeTop);
 
   stroke(255);
   fill(255);
@@ -223,8 +228,8 @@ void plotSelectRange()
   text(timeStringNow, graphRight, selectRangeTop + textSize*1);
   text(dateStringNow, graphRight, selectRangeTop + textSize*2.5);
   
-  stroke(0);
-  fill(0);
+  //stroke(0);
+  //fill(0);
 
   plotData(selectRangeLeft, selectRangeRight, selectRangeBottom, selectRangeTop);
 }
@@ -232,8 +237,8 @@ void plotSelectRange()
 
 void plotAxes() {
   int textSize = 12;
-  float minVoltage = 0;
-  float maxVoltage = 0; 
+  //float minVoltage = 0;
+  //float maxVoltage = 0; 
   
   // plot x and y axes as a box
   stroke(0, 128, 0);
@@ -241,6 +246,8 @@ void plotAxes() {
   // plot x-axis
   line(graphLeft, graphBottom, graphRight, graphBottom); 
   line(graphLeft, graphTop, graphRight, graphTop); 
+  
+  line(graphLeft, (graphTop + graphBottom)/2, graphRight, (graphTop + graphBottom)/2); 
 
   // plot y-axis
   line(graphLeft, graphBottom, graphLeft, graphTop); 
@@ -264,13 +271,15 @@ void plotAxes() {
   textSize(textSize);
   textAlign(RIGHT);
   
-  minVoltage = minData;
-  text(minVoltage, graphLeft - textSize/2, graphBottom);
-  //text(round(minVoltage), graphLeft - textSize/2, graphBottom);
+  text(minData, graphLeft - textSize/2, graphBottom + textSize/2);
+  //minVoltage = minData;
+  //text(minVoltage, graphLeft - textSize/2, graphBottom);
 
-  maxVoltage = maxData;
-  text(maxVoltage, graphLeft - textSize/2, graphTop + textSize);
-  //text(round(maxVoltage), graphLeft - textSize/2, graphTop + textSize);
+  text(maxData, graphLeft - textSize/2, graphTop + textSize/2);
+  //maxVoltage = maxData;
+  //text(maxVoltage, graphLeft - textSize/2, graphTop + textSize);
+ 
+  text((minData + maxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
 
   textAlign(CENTER);
   text(timeStringStart, graphLeft, graphBottom + textSize*1.5);
