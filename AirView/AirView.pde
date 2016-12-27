@@ -2,33 +2,34 @@
 // Plot the graph of the air voltage from Arduino
 // to predict earthquakes.
 // Dyson Lin dysonlin@gmail.com
-// 2016-07-30 05:58 UTC+8 V1.0 
-// 2016-08-10 15:42 UTC+8 V2.1.3 20x data compression. Change background to Black.
-// 2016-08-16 21:56 UTC+8 V2.1.9 Plot select range area.
-// 2016-08-16 22:17 UTC+8 V2.2.0 Adjust text sizes.
-// 2016-08-17 23:43 UTC+8 V2.2.1 Use noLoop() and redraw() to plot graph only after reading new data.
-// 2016-08-19 18:40 UTC+8 V2.2.2 10K-Ohom-R Voltage!
-// 2016-08-19 19:14 UTC+8 V2.2.3 Water Voltage!
-// 2016-08-20 21:04 UTC+8 V2.2.4 220-Ohom-R Voltage!
-// 2016-08-24 04:25 UTC+8 V2.2.5 Air Voltage.
-// 2016-08-26 17:10 UTC+8 V2.2.6 Fix the minData and maxData bug.
-// 2016-08-27 03:53 UTC+8 V2.2.7 Modify plotData(), plotSelectRange().
-// 2016-08-29 01:31 UTC+8 V2.2.8 Comment out noLoop() and redraw().
-// 2016-08-29 02:23 UTC+8 V2.2.9 Make the window resizable.
-// 2016-11-05 13:20 UTC+8 V3.0.0 Change the input from ADC data to the converted voltage in mV
+// 2016-07-30 05:58 UTC+8 AirView V1.0.0
+// 2016-08-10 15:42 UTC+8 AirView V2.1.3 20x data compression. Change background to Black.
+// 2016-08-16 21:56 UTC+8 AirView V2.1.9 Plot select range area.
+// 2016-08-16 22:17 UTC+8 AirView V2.2.0 Adjust text sizes.
+// 2016-08-17 23:43 UTC+8 AirView V2.2.1 Use noLoop() and redraw() to plot graph only after reading new data.
+// 2016-08-19 18:40 UTC+8 AirView V2.2.2 10K-Ohom-R Voltage!
+// 2016-08-19 19:14 UTC+8 AirView V2.2.3 Water Voltage!
+// 2016-08-20 21:04 UTC+8 AirView V2.2.4 220-Ohom-R Voltage!
+// 2016-08-24 04:25 UTC+8 AirView V2.2.5 Air Voltage.
+// 2016-08-26 17:10 UTC+8 AirView V2.2.6 Fix the minData and maxData bug.
+// 2016-08-27 03:53 UTC+8 AirView V2.2.7 Modify plotData(), plotSelectRange().
+// 2016-08-29 01:31 UTC+8 AirView V2.2.8 Comment out noLoop() and redraw().
+// 2016-08-29 02:23 UTC+8 AirView V2.2.9 Make the window resizable.
+// 2016-11-05 13:20 UTC+8 AirView V3.0.0 Change the input from ADC data to the converted voltage in mV
 //                               Set compressionRatio to 1.
-// 2016-11-06 06:27 UTC+8 V3.0.1 Set compressionRatio to 20.
-// 2016-12-06 11:12 UTC+8 V3.0.2 Change the color of the min-max graph from white to gray.
-// 2016-12-06 14:42 UTC+8 V3.0.3 Plot the mean graph in white.
+// 2016-11-06 06:27 UTC+8 AirView V3.0.1 Set compressionRatio to 20.
+// 2016-12-06 11:12 UTC+8 AirView V3.0.2 Change the color of the min-max graph from white to gray.
+// 2016-12-06 14:42 UTC+8 AirView V3.0.3 Plot the mean graph in white.
 //                               Set compressionRatio to 32.
-// 2016-12-09 16:04 UTC+8 V3.0.4 Set compressionRatio to 128.
-// 2016-12-10 10:50 UTC+8 V3.0.5 Change int to float.
-// 2016-12-10 17:41 UTC+8 V3.0.6 Plot Mean Graph only.
-// 2016-12-22 12:06 UTC+8 V3.0.7 Set window title to show version number.
+// 2016-12-09 16:04 UTC+8 AirView V3.0.4 Set compressionRatio to 128.
+// 2016-12-10 10:50 UTC+8 AirView V3.0.5 Change int to float.
+// 2016-12-10 17:41 UTC+8 AirView V3.0.6 Plot Mean Graph only.
+// 2016-12-22 12:06 UTC+8 AirView V3.0.7 Set window title to show version number.
 // 2016-12-22 12:25 UTC+8 AirView V3.0.8 Change y-axis captions from int to float.
+// 2016-12-27 20:47 UTC+8 AirView V3.0.9 Change x and y axes to a box.
 
 import processing.serial.*;
-String titleString = "AirView V3.0.8";
+String titleString = "AirView V3.0.9";
 
 int startTime = 0;
 int currentTime = 0;
@@ -147,8 +148,8 @@ void setTimeStamp()
 void draw()
 {
   background(0);  // black background
-  stroke(255);
-  fill(255);
+  //stroke(255);
+  //fill(255);
 
   // Set the location of graph
   graphLeft = 80;
@@ -158,7 +159,7 @@ void draw()
   graphBottom = height - 100;
   maxTime = graphRight - graphLeft;
 
-  background(0);
+  //background(0);
   setTimeStamp();
   plotSelectRange();
   plotAxes();
@@ -209,7 +210,7 @@ void plotSelectRange()
 
   stroke(0, 128, 0, 128);
   fill(0, 128, 0, 128);
-  rect(selectRangeLeft, selectRangeTop, selectRangeRight - selectRangeLeft, selectRangeBottom - selectRangeTop);
+ rect(selectRangeLeft, selectRangeTop, selectRangeRight - selectRangeLeft, selectRangeBottom - selectRangeTop);
 
   stroke(255);
   fill(255);
@@ -221,6 +222,9 @@ void plotSelectRange()
   textAlign(CENTER);
   text(timeStringNow, graphRight, selectRangeTop + textSize*1);
   text(dateStringNow, graphRight, selectRangeTop + textSize*2.5);
+  
+  stroke(0);
+  fill(0);
 
   plotData(selectRangeLeft, selectRangeRight, selectRangeBottom, selectRangeTop);
 }
@@ -230,6 +234,21 @@ void plotAxes() {
   int textSize = 12;
   float minVoltage = 0;
   float maxVoltage = 0; 
+  
+  // plot x and y axes as a box
+  stroke(0, 128, 0);
+  
+  // plot x-axis
+  line(graphLeft, graphBottom, graphRight, graphBottom); 
+  line(graphLeft, graphTop, graphRight, graphTop); 
+
+  // plot y-axis
+  line(graphLeft, graphBottom, graphLeft, graphTop); 
+  line(graphRight, graphBottom, graphRight, graphTop); 
+  
+  // plot graph title and captions
+  stroke(255);
+  fill(255);
 
   textAlign(CENTER);
   textSize = 24;
@@ -241,12 +260,8 @@ void plotAxes() {
   text("Time", (graphRight + graphLeft)/2, graphBottom + textSize * 3);
   text("V (mV)", graphLeft, graphTop - textSize);
 
-  // plot x-axis
   textSize = 12;
   textSize(textSize);
-
-  stroke(0, 128, 0);
-  line(graphLeft, graphBottom, graphLeft, graphTop); 
   textAlign(RIGHT);
   
   minVoltage = minData;
@@ -265,8 +280,6 @@ void plotAxes() {
   text(timeStringNow, graphRight, graphBottom + textSize*1.5);
   text(dateStringNow, graphRight, graphBottom + textSize*2.5);
 
-  // plot y-axis
-  line(graphLeft, graphBottom, graphRight, graphBottom); 
   textAlign(CENTER);
 
   textSize = 16;
