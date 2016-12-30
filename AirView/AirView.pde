@@ -28,9 +28,10 @@
 // 2016-12-22 12:25 UTC+8 AirView V3.0.8 Change y-axis captions from int to float.
 // 2016-12-27 20:47 UTC+8 AirView V3.0.9 Change x and y axes to a box.
 // 2016-12-28 02:45 UTC+8 AirView V3.1.0 Plot central line for y axis.
+// 2016-12-31 04:45 UTC+8 AirView V3.1.1 Plot central line for x axis.
 
 import processing.serial.*;
-String titleString = "AirView V3.1.0";
+String titleString = "AirView V3.1.1";
 
 int startTime = 0;
 int currentTime = 0;
@@ -246,13 +247,13 @@ void plotAxes() {
   // plot x-axis
   line(graphLeft, graphBottom, graphRight, graphBottom); 
   line(graphLeft, graphTop, graphRight, graphTop); 
-  
-  line(graphLeft, (graphTop + graphBottom)/2, graphRight, (graphTop + graphBottom)/2); 
+  line(graphLeft, (graphBottom + graphTop)/2, graphRight, (graphBottom + graphTop)/2); 
 
   // plot y-axis
   line(graphLeft, graphBottom, graphLeft, graphTop); 
   line(graphRight, graphBottom, graphRight, graphTop); 
-  
+  line((graphLeft + graphRight)/2, graphBottom, (graphLeft + graphRight)/2, graphTop); 
+
   // plot graph title and captions
   stroke(255);
   fill(255);
