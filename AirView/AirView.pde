@@ -30,9 +30,11 @@
 // 2016-12-28 02:45 UTC+8 AirView V3.1.0 Plot central line for y axis.
 // 2016-12-31 04:45 UTC+8 AirView V3.1.1 Plot central line for x axis.
 // 2017-01-01 23:43 UTC+8 AirView V3.1.2 Add isLeapYear().
+// 2017-01-02 03:47 UTC+8 AirView V3.1.3 Add dateAndTimeToNumber().
+
 
 import processing.serial.*;
-String titleString = "AirView V3.1.2";
+String titleString = "AirView V3.1.3";
 
 int startTime = 0;
 int currentTime = 0;
@@ -78,16 +80,17 @@ boolean mouseInZoomArea(int x, int y)
 {
   boolean inZoomArea = false;
   int zoomAreaLength = 10;
-  int zoomLeft = width - zoomAreaLength;;
+  int zoomLeft = width - zoomAreaLength;
+  ;
   int zoomRight = width;
   int zoomBottom = height;
   int zoomTop = height - zoomAreaLength;
-  
+
   if ((x >= zoomLeft) && (x <= zoomRight) && (y <= zoomBottom) && (y >= zoomTop))
   {
     inZoomArea = true;
   }
-  
+
   return inZoomArea;
 }
 
@@ -108,13 +111,90 @@ void setup()
 {
   // Set window title to show version number
   surface.setTitle(titleString);
-  
+
   size(1200, 800);
   surface.setResizable(true);
 
   openSerialPort();
   setStartTimeStamp();
 }
+
+
+// For now, this will work for 2017~2019 only!
+// Need to modify it later.
+// 1.0 == 2017-01-01 00:00:00
+float dateAndTimeToNumber(int yearInt, int monthInt, int dayInt, int hourInt, int minuteInt, int secondInt)
+{
+  float days = 0.0;
+  int daysOfFebruary = 28;
+
+  if (isLeapYear(yearInt))
+  {
+    daysOfFebruary = 29;
+  }
+
+  // For now, this will work for 2017 only!
+  // Need to modify it later.
+  // 0.0 == 2017-01-01 00:00:00
+  if ((yearInt < 2017) || (yearInt > 2019))
+  {
+    println("For now, this will work for 2017~2019 only!");
+    return 0.0;
+  }
+
+  days += (yearInt - 2017) * 365.0;
+
+  switch(monthInt) 
+  {
+  case 1: 
+    // do nothing.
+    break;
+  case 2: 
+    days += 31;
+    break;
+  case 3: 
+    days += 31 + daysOfFebruary;
+    break;
+  case 4: 
+    days += 31 + daysOfFebruary + 31;
+    break;
+  case 5: 
+    days += 31 + daysOfFebruary + 31 + 30;
+    break;
+  case 6: 
+    days += 31 + daysOfFebruary + 31 + 30 + 31;
+    break;
+  case 7: 
+    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30;
+    break;
+  case 8: 
+    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31;
+    break;
+  case 9: 
+    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31;
+    break;
+  case 10: 
+    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30;
+    break;
+  case 11: 
+    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31;
+    break;
+  case 12: 
+    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30;
+    break;
+   default:
+    println("Incorrect Month: " + monthInt);
+    break;
+  }
+
+  days += dayInt;
+  days += hourInt / 24.0;
+  days += minuteInt /1440.0;
+  days += secondInt / 86400.0;
+
+  return days;
+}
+
 
 
 void   openSerialPort()
@@ -130,6 +210,34 @@ void   openSerialPort()
   myPort.clear(); // Clear buffer
   myPort.bufferUntil(lf); // Trigger serialEvent() only after linefeed is read.
 }
+
+
+Boolean isLeapYear(int year)
+{
+  int remainder = 0;
+
+  remainder = year % 400;
+  if (remainder == 0)
+  {
+    return true;
+  }
+
+  remainder = year % 100;
+  if (remainder == 0)
+  {
+    return false;
+  }
+
+  remainder = year % 4;
+  if (remainder == 0)
+  {
+    return true;
+  }
+
+  return false;
+}
+
+
 
 
 void setStartTimeStamp()
@@ -175,13 +283,13 @@ void plotData(int leftBorder, int rightBorder, int bottomBorder, int topBorder) 
   float y1 = 0;
   float x2 = 0;
   float y2 = 0;
-  
+
   stroke(255); // white
 
   if (dataNumber < 1) {
     return;
   }
-  
+
   if (dataNumber == 1) {
     point(leftBorder, bottomBorder);
     return;
@@ -190,7 +298,7 @@ void plotData(int leftBorder, int rightBorder, int bottomBorder, int topBorder) 
   // set first point
   x1 = leftBorder;
   y1 = map(data[0], minData, maxData, bottomBorder, topBorder);
-  
+
   // plot lines
   for (int i=1; i<dataNumber; i++)
   {
@@ -229,7 +337,7 @@ void plotSelectRange()
   textAlign(CENTER);
   text(timeStringNow, graphRight, selectRangeTop + textSize*1);
   text(dateStringNow, graphRight, selectRangeTop + textSize*2.5);
-  
+
   //stroke(0);
   //fill(0);
 
@@ -241,10 +349,10 @@ void plotAxes() {
   int textSize = 12;
   //float minVoltage = 0;
   //float maxVoltage = 0; 
-  
+
   // plot x and y axes as a box
   stroke(0, 128, 0);
-  
+
   // plot x-axis
   line(graphLeft, graphBottom, graphRight, graphBottom); 
   line(graphLeft, graphTop, graphRight, graphTop); 
@@ -272,7 +380,7 @@ void plotAxes() {
   textSize = 12;
   textSize(textSize);
   textAlign(RIGHT);
-  
+
   text(minData, graphLeft - textSize/2, graphBottom + textSize/2);
   //minVoltage = minData;
   //text(minVoltage, graphLeft - textSize/2, graphBottom);
@@ -280,7 +388,7 @@ void plotAxes() {
   text(maxData, graphLeft - textSize/2, graphTop + textSize/2);
   //maxVoltage = maxData;
   //text(maxVoltage, graphLeft - textSize/2, graphTop + textSize);
- 
+
   text((minData + maxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
 
   textAlign(CENTER);
@@ -333,22 +441,22 @@ void serialEvent(Serial whichPort) {
     // bufferNumber == bufferSize-1
     // That means buffer is full.
     // Compress data: compute the mean.
-   
+
     float sum = 0;
     int i = 0;
     float yMean = 0;
     String s = null;
 
 
-    
+
     sum = 0;
     for (i=0; i<bufferSize; i++)
     {
       sum = sum + buffer[i];
     }
     yMean = sum / bufferSize;
-    
-    
+
+
     bufferNumber = 0;
 
     if (dataNumber == 0)
@@ -370,31 +478,6 @@ void serialEvent(Serial whichPort) {
     data[dataNumber] = yMean;
     s = "data[" + dataNumber + "] = " + data[dataNumber];
     println(s);
-    dataNumber++;  
+    dataNumber++;
   }
-}
-
-Boolean isLeapYear(int year)
-{
-  int remainder = 0;
-  
-  remainder = year % 400;
-  if (remainder == 0)
-  {
-    return true;
-  }
-  
-  remainder = year % 100;
-  if (remainder == 0)
-  {
-    return false;
-  }
-  
-  remainder = year % 4;
-  if (remainder == 0)
-  {
-    return true;
-  }
-  
-  return false;
 }
