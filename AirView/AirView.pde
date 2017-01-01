@@ -29,9 +29,10 @@
 // 2016-12-27 20:47 UTC+8 AirView V3.0.9 Change x and y axes to a box.
 // 2016-12-28 02:45 UTC+8 AirView V3.1.0 Plot central line for y axis.
 // 2016-12-31 04:45 UTC+8 AirView V3.1.1 Plot central line for x axis.
+// 2017-01-01 23:43 UTC+8 AirView V3.1.2 Add isLeapYear().
 
 import processing.serial.*;
-String titleString = "AirView V3.1.1";
+String titleString = "AirView V3.1.2";
 
 int startTime = 0;
 int currentTime = 0;
@@ -371,4 +372,29 @@ void serialEvent(Serial whichPort) {
     println(s);
     dataNumber++;  
   }
+}
+
+Boolean isLeapYear(int year)
+{
+  int remainder = 0;
+  
+  remainder = year % 400;
+  if (remainder == 0)
+  {
+    return true;
+  }
+  
+  remainder = year % 100;
+  if (remainder == 0)
+  {
+    return false;
+  }
+  
+  remainder = year % 4;
+  if (remainder == 0)
+  {
+    return true;
+  }
+  
+  return false;
 }
