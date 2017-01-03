@@ -1,40 +1,41 @@
 // AirView //<>//
 // Plot the graph of the air voltage from Arduino
-// to predict earthquakes.
+// to predict earthquakes
 // Dyson Lin dysonlin@gmail.com
 // 2016-07-30 05:58 UTC+8 AirView V1.0.0
-// 2016-08-10 15:42 UTC+8 AirView V2.1.3 20x data compression. Change background to Black.
-// 2016-08-16 21:56 UTC+8 AirView V2.1.9 Plot select range area.
-// 2016-08-16 22:17 UTC+8 AirView V2.2.0 Adjust text sizes.
-// 2016-08-17 23:43 UTC+8 AirView V2.2.1 Use noLoop() and redraw() to plot graph only after reading new data.
-// 2016-08-19 18:40 UTC+8 AirView V2.2.2 10K-Ohom-R Voltage!
-// 2016-08-19 19:14 UTC+8 AirView V2.2.3 Water Voltage!
-// 2016-08-20 21:04 UTC+8 AirView V2.2.4 220-Ohom-R Voltage!
-// 2016-08-24 04:25 UTC+8 AirView V2.2.5 Air Voltage.
-// 2016-08-26 17:10 UTC+8 AirView V2.2.6 Fix the minData and maxData bug.
-// 2016-08-27 03:53 UTC+8 AirView V2.2.7 Modify plotData(), plotSelectRange().
-// 2016-08-29 01:31 UTC+8 AirView V2.2.8 Comment out noLoop() and redraw().
-// 2016-08-29 02:23 UTC+8 AirView V2.2.9 Make the window resizable.
+// 2016-08-10 15:42 UTC+8 AirView V2.1.3 20x data compression. Change background to Black
+// 2016-08-16 21:56 UTC+8 AirView V2.1.9 Plot select range area
+// 2016-08-16 22:17 UTC+8 AirView V2.2.0 Adjust text sizes
+// 2016-08-17 23:43 UTC+8 AirView V2.2.1 Use noLoop() and redraw() to plot graph only after reading new data
+// 2016-08-19 18:40 UTC+8 AirView V2.2.2 10K-Ohom-R Voltage
+// 2016-08-19 19:14 UTC+8 AirView V2.2.3 Water Voltage
+// 2016-08-20 21:04 UTC+8 AirView V2.2.4 220-Ohom-R Voltage
+// 2016-08-24 04:25 UTC+8 AirView V2.2.5 Air Voltage
+// 2016-08-26 17:10 UTC+8 AirView V2.2.6 Fix the minData and maxData bug
+// 2016-08-27 03:53 UTC+8 AirView V2.2.7 Modify plotData(), plotSelectRange()
+// 2016-08-29 01:31 UTC+8 AirView V2.2.8 Comment out noLoop() and redraw()
+// 2016-08-29 02:23 UTC+8 AirView V2.2.9 Make the window resizable
 // 2016-11-05 13:20 UTC+8 AirView V3.0.0 Change the input from ADC data to the converted voltage in mV
-//                               Set compressionRatio to 1.
-// 2016-11-06 06:27 UTC+8 AirView V3.0.1 Set compressionRatio to 20.
-// 2016-12-06 11:12 UTC+8 AirView V3.0.2 Change the color of the min-max graph from white to gray.
-// 2016-12-06 14:42 UTC+8 AirView V3.0.3 Plot the mean graph in white.
-//                               Set compressionRatio to 32.
-// 2016-12-09 16:04 UTC+8 AirView V3.0.4 Set compressionRatio to 128.
-// 2016-12-10 10:50 UTC+8 AirView V3.0.5 Change int to float.
-// 2016-12-10 17:41 UTC+8 AirView V3.0.6 Plot Mean Graph only.
-// 2016-12-22 12:06 UTC+8 AirView V3.0.7 Set window title to show version number.
-// 2016-12-22 12:25 UTC+8 AirView V3.0.8 Change y-axis captions from int to float.
-// 2016-12-27 20:47 UTC+8 AirView V3.0.9 Change x and y axes to a box.
-// 2016-12-28 02:45 UTC+8 AirView V3.1.0 Plot central line for y axis.
-// 2016-12-31 04:45 UTC+8 AirView V3.1.1 Plot central line for x axis.
-// 2017-01-01 23:43 UTC+8 AirView V3.1.2 Add isLeapYear().
-// 2017-01-02 03:47 UTC+8 AirView V3.1.3 Add dateAndTimeToNumber().
+//                                Set compressionRatio to 1
+// 2016-11-06 06:27 UTC+8 AirView V3.0.1 Set compressionRatio to 20
+// 2016-12-06 11:12 UTC+8 AirView V3.0.2 Change the color of the min-max graph from white to gray
+// 2016-12-06 14:42 UTC+8 AirView V3.0.3 Plot the mean graph in white
+//                                Set compressionRatio to 32
+// 2016-12-09 16:04 UTC+8 AirView V3.0.4 Set compressionRatio to 128
+// 2016-12-10 10:50 UTC+8 AirView V3.0.5 Change int to float
+// 2016-12-10 17:41 UTC+8 AirView V3.0.6 Plot Mean Graph only
+// 2016-12-22 12:06 UTC+8 AirView V3.0.7 Set window title to show version number
+// 2016-12-22 12:25 UTC+8 AirView V3.0.8 Change y-axis captions from int to float
+// 2016-12-27 20:47 UTC+8 AirView V3.0.9 Change x and y axes to a box
+// 2016-12-28 02:45 UTC+8 AirView V3.1.0 Plot central line for y axis
+// 2016-12-31 04:45 UTC+8 AirView V3.1.1 Plot central line for x axis
+// 2017-01-01 23:43 UTC+8 AirView V3.1.2 Add isLeapYear()
+// 2017-01-02 03:47 UTC+8 AirView V3.1.3 Add dateAndTimeToNumber()
+// 2017-01-04 03:55 UTC+8 AirView V3.1.4 Add numberToDate()
 
 
 import processing.serial.*;
-String titleString = "AirView V3.1.3";
+String titleString = "AirView V3.1.4";
 
 int startTime = 0;
 int currentTime = 0;
@@ -120,7 +121,7 @@ void setup()
 }
 
 
-// For now, this will work for 2017~2019 only!
+// For now, this works for 2017~2019 only!
 // Need to modify it later.
 // 1.0 == 2017-01-01 00:00:00
 float dateAndTimeToNumber(int yearInt, int monthInt, int dayInt, int hourInt, int minuteInt, int secondInt)
@@ -136,9 +137,9 @@ float dateAndTimeToNumber(int yearInt, int monthInt, int dayInt, int hourInt, in
   // For now, this will work for 2017 only!
   // Need to modify it later.
   // 0.0 == 2017-01-01 00:00:00
-  if ((yearInt < 2017) || (yearInt > 2019))
+  if ((yearInt < 2017) || (yearInt > 2017))
   {
-    println("For now, this will work for 2017~2019 only!");
+    println("For now, this works for 2017 only!");
     return 0.0;
   }
 
@@ -195,6 +196,98 @@ float dateAndTimeToNumber(int yearInt, int monthInt, int dayInt, int hourInt, in
   return days;
 }
 
+
+// For now, this will work for 2017 only!
+// Need to modify it later.
+// 0.0 == 2017-01-01 00:00:00
+String numberToDate(float number)
+{
+  int yearInt;
+  int monthInt;
+  int dayInt;
+  String dateString;
+  
+  int daysOfFebruary = 28;
+  
+  yearInt = 2017;
+  
+  if (isLeapYear(yearInt))
+  {
+    daysOfFebruary = 29;
+  }
+
+  dayInt = int(number);
+  
+  if (dayInt <= (31)) 
+  {
+    monthInt = 1;
+    dayInt = dayInt;
+  }
+  else if (dayInt <= (31 + daysOfFebruary))
+  {
+    monthInt = 2;
+    dayInt = dayInt - (31);
+  }
+  else if (dayInt <= (31 + daysOfFebruary + 31))
+  {
+    monthInt = 3;
+    dayInt = dayInt - (31 + daysOfFebruary);
+  }
+  else if (dayInt <= (31 + daysOfFebruary + 31 + 30))
+  {
+    monthInt = 4;
+    dayInt = dayInt - (31 + daysOfFebruary + 31);
+  }
+  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31))
+  {
+    monthInt = 5;
+    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30);
+  }
+  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30))
+  {
+    monthInt = 6;
+    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31);
+  }
+  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31))
+  {
+    monthInt = 7;
+    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30);
+  }
+  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31))
+  {
+    monthInt = 8;
+    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31);
+  }
+  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30))
+  {
+    monthInt = 9;
+    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31);
+  }
+  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31))
+  {
+    monthInt = 10;
+    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30);
+  }
+  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30))
+  {
+    monthInt = 11;
+    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31);
+  }
+  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31))
+  {
+    monthInt = 12;
+    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30);
+  }
+  else
+  {
+    monthInt = 13;
+    dayInt = 0;
+    println("Incorrect Month: " + monthInt);
+  }
+
+  dateString = yearInt + "-" + nf(monthInt, 2) + "-" + nf(dayInt, 2);
+  return dateString;
+}
 
 
 void   openSerialPort()
