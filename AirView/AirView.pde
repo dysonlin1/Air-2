@@ -32,10 +32,10 @@
 // 2017-01-01 23:43 UTC+8 AirView V3.1.2 Add isLeapYear()
 // 2017-01-02 03:47 UTC+8 AirView V3.1.3 Add dateAndTimeToNumber()
 // 2017-01-04 03:55 UTC+8 AirView V3.1.4 Add numberToDate()
-
+// 2017-01-04 23:59 UTC+8 AirView V3.1.5 Add timeToDate()
 
 import processing.serial.*;
-String titleString = "AirView V3.1.4";
+String titleString = "AirView V3.1.5";
 
 int startTime = 0;
 int currentTime = 0;
@@ -288,6 +288,35 @@ String numberToDate(float number)
   dateString = yearInt + "-" + nf(monthInt, 2) + "-" + nf(dayInt, 2);
   return dateString;
 }
+
+
+// 0.0 == 2017-01-01 00:00:00
+String timeToDate(float number)
+{
+  int dayInt;
+  float hourNumber;
+  float minuteNumber;
+  float secondNumber;  
+  int hourInt;
+  int minuteInt;
+  int secondInt;
+  String timeString;
+  
+  dayInt = int(number);
+  hourNumber = number - dayInt;
+  hourInt = int(hourNumber * 24);
+  
+  minuteNumber = hourNumber - (hourInt / 24);
+  minuteInt = int(minuteNumber * 1440);
+  
+  secondNumber = minuteNumber - (minuteInt / 1440);
+  secondInt = round(secondNumber * 86400);
+  
+  timeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+  
+  return timeString;
+}
+
 
 
 void   openSerialPort()
