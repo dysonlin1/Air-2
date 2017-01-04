@@ -33,9 +33,10 @@
 // 2017-01-02 03:47 UTC+8 AirView V3.1.3 Add dateAndTimeToNumber()
 // 2017-01-04 03:55 UTC+8 AirView V3.1.4 Add numberToDate()
 // 2017-01-04 23:59 UTC+8 AirView V3.1.5 Add timeToDate()
+// 2017-01-05 00:05 UTC+8 AirView V3.1.6 Change timeToDate() to numberToTime()
 
 import processing.serial.*;
-String titleString = "AirView V3.1.5";
+String titleString = "AirView V3.1.6";
 
 int startTime = 0;
 int currentTime = 0;
@@ -291,7 +292,7 @@ String numberToDate(float number)
 
 
 // 0.0 == 2017-01-01 00:00:00
-String timeToDate(float number)
+String numberToTime(float number)
 {
   int dayInt;
   float hourNumber;
