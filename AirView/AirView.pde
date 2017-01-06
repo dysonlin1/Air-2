@@ -34,17 +34,25 @@
 // 2017-01-04 03:55 UTC+8 AirView V3.1.4 Add numberToDate()
 // 2017-01-04 23:59 UTC+8 AirView V3.1.5 Add timeToDate()
 // 2017-01-05 00:05 UTC+8 AirView V3.1.6 Change timeToDate() to numberToTime()
+// 2017-01-07 07:17 UTC+8 AirView V3.1.7 Show date and time for central x 
 
 import processing.serial.*;
-String titleString = "AirView V3.1.6";
+String titleString = "AirView V3.1.7";
 
 int startTime = 0;
 int currentTime = 0;
 
-String timeStringStart = null;
-String dateStringStart = null;
-String timeStringNow = null;
-String dateStringNow = null;
+float startTimeNumber = 0.0;
+String startTimeString = "";
+String startDateString = "";
+
+float currentTimeNumber = 0.0;
+String currentTimeString = "";
+String currentDateString = "";
+
+float halfTimeNumber = 0.0;
+String halfTimeString = "";
+String halfDateString = "";
 
 int graphLeft = 0;
 int graphRight = 0;
@@ -119,6 +127,7 @@ void setup()
 
   openSerialPort();
   setStartTimeStamp();
+  setCurrentTimeStamp();
 }
 
 
@@ -294,23 +303,25 @@ String numberToDate(float number)
 // 0.0 == 2017-01-01 00:00:00
 String numberToTime(float number)
 {
-  int dayInt;
   float hourNumber;
   float minuteNumber;
   float secondNumber;  
+
+  int dayInt;
   int hourInt;
   int minuteInt;
   int secondInt;
+  
   String timeString;
   
   dayInt = int(number);
   hourNumber = number - dayInt;
   hourInt = int(hourNumber * 24);
   
-  minuteNumber = hourNumber - (hourInt / 24);
+  minuteNumber = hourNumber - (hourInt / 24.0); //<>//
   minuteInt = int(minuteNumber * 1440);
   
-  secondNumber = minuteNumber - (minuteInt / 1440);
+  secondNumber = minuteNumber - (minuteInt / 1440.0);
   secondInt = round(secondNumber * 86400);
   
   timeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
@@ -365,17 +376,44 @@ Boolean isLeapYear(int year)
 
 void setStartTimeStamp()
 {
+  int yearInt = year();
+  int monthInt = month();
+  int dayInt = day();
+  int hourInt = hour();
+  int minuteInt = minute();
+  int secondInt = second();
+  
   startTime = millis();
-  timeStringStart = nf(hour(), 2) + ":" + nf(minute(), 2) + ":" + nf(second(), 2);
-  dateStringStart = year() + "-" + nf(month(), 2) + "-" + nf(day(), 2);
+  
+  //startTimeString = nf(hour(), 2) + ":" + nf(minute(), 2) + ":" + nf(second(), 2);
+  //startDateString = year() + "-" + nf(month(), 2) + "-" + nf(day(), 2);
+  
+  startTimeNumber = dateAndTimeToNumber(yearInt, monthInt, dayInt, hourInt, minuteInt, secondInt);  
+  startDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dayInt, 2);
+  startTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
 }
 
 
-void setTimeStamp()
+void setCurrentTimeStamp()
 {
+  int yearInt = year();
+  int monthInt = month();
+  int dayInt = day();
+  int hourInt = hour();
+  int minuteInt = minute();
+  int secondInt = second();
+   
   currentTime = millis();
-  timeStringNow = nf(hour(), 2) + ":" + nf(minute(), 2) + ":" + nf(second(), 2);
-  dateStringNow = year() + "-" + nf(month(), 2) + "-" + nf(day(), 2);
+  
+  //currentTimeString = nf(hour(), 2) + ":" + nf(minute(), 2) + ":" + nf(second(), 2);
+  //currentDateString = year() + "-" + nf(month(), 2) + "-" + nf(day(), 2);
+  currentTimeNumber = dateAndTimeToNumber(yearInt, monthInt, dayInt, hourInt, minuteInt, secondInt);
+  currentDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dayInt, 2);
+  currentTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+
+  halfTimeNumber = (startTimeNumber + currentTimeNumber) / 2;
+  halfDateString = numberToDate(halfTimeNumber);
+  halfTimeString = numberToTime(halfTimeNumber);
 }
 
 
@@ -387,17 +425,15 @@ void draw()
 
   // Set the location of graph
   graphLeft = 80;
-  //graphLeft = 50;
   graphRight = width - 50;
   graphTop = 50;
   graphBottom = height - 100;
   maxTime = graphRight - graphLeft;
 
-  setTimeStamp();
+  setCurrentTimeStamp();
   plotSelectRange();
   plotAxes();
   plotData(graphLeft, graphRight, graphBottom, graphTop);
-  //plotData(graphLeft+3, graphRight, graphBottom-3, graphTop);
 }
 
 
@@ -438,7 +474,6 @@ void plotSelectRange()
 {
   // Set the location of graph
   selectRangeLeft = graphLeft + 50;
-  //selectRangeLeft = 100;
   selectRangeRight = width - 100;
   selectRangeBottom = height - 15;
   selectRangeTop = height - 48;
@@ -454,12 +489,12 @@ void plotSelectRange()
   fill(255);
 
   textAlign(CENTER);
-  text(timeStringStart, graphLeft, selectRangeTop + textSize*1);
-  text(dateStringStart, graphLeft, selectRangeTop + textSize*2.5);
+  text(startTimeString, graphLeft, selectRangeTop + textSize*1);
+  text(startDateString, graphLeft, selectRangeTop + textSize*2.5);
 
   textAlign(CENTER);
-  text(timeStringNow, graphRight, selectRangeTop + textSize*1);
-  text(dateStringNow, graphRight, selectRangeTop + textSize*2.5);
+  text(currentTimeString, graphRight, selectRangeTop + textSize*1);
+  text(currentDateString, graphRight, selectRangeTop + textSize*2.5);
 
   //stroke(0);
   //fill(0);
@@ -470,8 +505,6 @@ void plotSelectRange()
 
 void plotAxes() {
   int textSize = 12;
-  //float minVoltage = 0;
-  //float maxVoltage = 0; 
 
   // plot x and y axes as a box
   stroke(0, 128, 0);
@@ -505,28 +538,29 @@ void plotAxes() {
   textAlign(RIGHT);
 
   text(minData, graphLeft - textSize/2, graphBottom + textSize/2);
-  //minVoltage = minData;
-  //text(minVoltage, graphLeft - textSize/2, graphBottom);
-
   text(maxData, graphLeft - textSize/2, graphTop + textSize/2);
-  //maxVoltage = maxData;
-  //text(maxVoltage, graphLeft - textSize/2, graphTop + textSize);
-
   text((minData + maxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
 
   textAlign(CENTER);
-  text(timeStringStart, graphLeft, graphBottom + textSize*1.5);
-  text(dateStringStart, graphLeft, graphBottom + textSize*2.5);
+  text(startTimeString, graphLeft, graphBottom + textSize*1.5);
+  text(startDateString, graphLeft, graphBottom + textSize*2.5);
+  //text(startTimeNumber, graphLeft, graphBottom + textSize*3.5);
 
-  textAlign(CENTER);
-  text(timeStringNow, graphRight, graphBottom + textSize*1.5);
-  text(dateStringNow, graphRight, graphBottom + textSize*2.5);
+  //textAlign(CENTER);
+  text(currentTimeString, graphRight, graphBottom + textSize*1.5);
+  text(currentDateString, graphRight, graphBottom + textSize*2.5);
+  //text(currentTimeNumber, graphRight, graphBottom + textSize*3.5);  
+  
+  // Show date and time for central x
+  text(halfTimeString, (graphLeft+graphRight)/2, graphBottom + textSize*1.5);
+  text(halfDateString, (graphLeft+graphRight)/2, graphBottom + textSize*2.5);
+  //text(halfTimeNumber, (graphLeft+graphRight)/2, graphBottom + textSize*3.5);  
 
-  textAlign(CENTER);
+  //textAlign(CENTER);
 
   textSize = 16;
   textSize(textSize);
-  textAlign(CENTER);
+  //textAlign(CENTER);
   text("Time", (graphRight + graphLeft)/2, graphBottom + textSize * 3);
   text("V (mV)", graphLeft, graphTop - textSize);
 }
