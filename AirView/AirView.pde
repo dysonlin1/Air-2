@@ -35,9 +35,10 @@
 // 2017-01-04 23:59 UTC+8 AirView V3.1.5 Add timeToDate()
 // 2017-01-05 00:05 UTC+8 AirView V3.1.6 Change timeToDate() to numberToTime()
 // 2017-01-07 07:17 UTC+8 AirView V3.1.7 Show date and time for central x 
+// 2017-01-11 09:55 UTC+8 AirView V3.1.8 Change Select Area from fill to lines to fix ghost lines
 
 import processing.serial.*;
-String titleString = "AirView V3.1.7";
+String titleString = "AirView V3.1.8";
 
 int startTime = 0;
 int currentTime = 0;
@@ -85,6 +86,262 @@ int[] dataTime = new int[dataLimit];
 int dataNumber = 0;
 
 
+void setup()
+{
+  // Set window title to show version number
+  surface.setTitle(titleString);
+
+  size(1200, 800);
+  surface.setResizable(true);
+
+  openSerialPort();
+  setStartTimeStamp();
+  setCurrentTimeStamp();
+}
+
+ //<>//
+void   openSerialPort()
+{
+  int lf = 10;    // Linefeed in ASCII
+  Serial myPort;  // The serial port
+
+  // List all the available serial ports
+  print("Available serial ports: ");
+  printArray(Serial.list());
+
+  myPort = new Serial(this, Serial.list()[0], 9600);
+  myPort.clear(); // Clear buffer
+  myPort.bufferUntil(lf); // Trigger serialEvent() only after linefeed is read.
+}
+
+
+void draw()
+{
+  background(0);  // black background
+  stroke(0);
+  fill(0);
+
+  // Set the location of graph
+  graphLeft = 80;
+  graphRight = width - 50;
+  graphTop = 50;
+  graphBottom = height - 100;
+  maxTime = graphRight - graphLeft;
+
+  setCurrentTimeStamp();
+  plotSelectRange();
+  plotAxes();
+  plotData(graphLeft, graphRight, graphBottom, graphTop);
+}
+
+
+void plotData(int leftBorder, int rightBorder, int bottomBorder, int topBorder) {
+  float x1 = 0;
+  float y1 = 0;
+  float x2 = 0;
+  float y2 = 0;
+
+  stroke(255); // white
+
+  if (dataNumber < 1) {
+    return;
+  }
+
+  if (dataNumber == 1) {
+    point(leftBorder, bottomBorder);
+    return;
+  }
+
+  // set first point
+  x1 = leftBorder;
+  y1 = map(data[0], minData, maxData, bottomBorder, topBorder);
+
+  // plot lines
+  for (int i=1; i<dataNumber; i++)
+  {
+    x2 = map(i, 0, dataNumber-1, leftBorder, rightBorder); // auto range
+    y2 = map(data[i], minData, maxData, bottomBorder, topBorder); // auto range
+    line(x1, y1, x2, y2);
+    x1 = x2;
+    y1 = y2;
+  }
+}
+
+
+void plotSelectRange()
+{
+  // Set the location of graph
+  selectRangeLeft = graphLeft + 50;
+  selectRangeRight = width - 100;
+  selectRangeBottom = height - 15;
+  selectRangeTop = height - 48;
+  
+  int textSize = 12;
+  textSize(textSize);
+
+  stroke(0, 128, 0, 128);
+  fill(0, 128, 0, 128);
+  //rect(selectRangeLeft, selectRangeTop, selectRangeRight - selectRangeLeft, selectRangeBottom - selectRangeTop);
+  line(selectRangeLeft, selectRangeBottom, selectRangeRight, selectRangeBottom);
+  line(selectRangeLeft, selectRangeTop, selectRangeRight, selectRangeTop);
+  line(selectRangeLeft, selectRangeBottom, selectRangeLeft, selectRangeTop);
+  line(selectRangeRight, selectRangeBottom, selectRangeRight, selectRangeTop);
+
+  stroke(255);
+  fill(255);
+
+  textAlign(CENTER);
+  text(startTimeString, graphLeft, selectRangeTop + textSize*1);
+  text(startDateString, graphLeft, selectRangeTop + textSize*2.5);
+
+  textAlign(CENTER);
+  text(currentTimeString, graphRight, selectRangeTop + textSize*1);
+  text(currentDateString, graphRight, selectRangeTop + textSize*2.5);
+
+  //stroke(0);
+  //fill(0);
+
+  plotData(selectRangeLeft, selectRangeRight, selectRangeBottom, selectRangeTop);
+}
+
+
+void plotAxes() {
+  int textSize = 12;
+
+  // plot x and y axes as a box
+  stroke(0, 128, 0);
+
+  // plot x-axis
+  line(graphLeft, graphBottom, graphRight, graphBottom); 
+  line(graphLeft, graphTop, graphRight, graphTop); 
+  line(graphLeft, (graphBottom + graphTop)/2, graphRight, (graphBottom + graphTop)/2); 
+
+  // plot y-axis
+  line(graphLeft, graphBottom, graphLeft, graphTop); 
+  line(graphRight, graphBottom, graphRight, graphTop); 
+  line((graphLeft + graphRight)/2, graphBottom, (graphLeft + graphRight)/2, graphTop); 
+
+  // plot graph title and captions
+  stroke(255);
+  fill(255);
+
+  textAlign(CENTER);
+  textSize = 24;
+  textSize(textSize);
+  text("Air Voltage", (graphLeft+graphRight)/2, graphTop - textSize);
+
+  textSize = 16;
+  textSize(textSize);
+  text("Time", (graphRight + graphLeft)/2, graphBottom + textSize * 3);
+  text("V (mV)", graphLeft, graphTop - textSize);
+
+  textSize = 12;
+  textSize(textSize);
+  textAlign(RIGHT);
+
+  text(minData, graphLeft - textSize/2, graphBottom + textSize/2);
+  text(maxData, graphLeft - textSize/2, graphTop + textSize/2);
+  text((minData + maxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
+
+  textAlign(CENTER);
+  text(startTimeString, graphLeft, graphBottom + textSize*1.5);
+  text(startDateString, graphLeft, graphBottom + textSize*2.5);
+  //text(startTimeNumber, graphLeft, graphBottom + textSize*3.5);
+
+  //textAlign(CENTER);
+  text(currentTimeString, graphRight, graphBottom + textSize*1.5);
+  text(currentDateString, graphRight, graphBottom + textSize*2.5);
+  //text(currentTimeNumber, graphRight, graphBottom + textSize*3.5);  
+  
+  // Show date and time for central x
+  text(halfTimeString, (graphLeft+graphRight)/2, graphBottom + textSize*1.5);
+  text(halfDateString, (graphLeft+graphRight)/2, graphBottom + textSize*2.5);
+  //text(halfTimeNumber, (graphLeft+graphRight)/2, graphBottom + textSize*3.5);  
+
+  //textAlign(CENTER);
+
+  textSize = 16;
+  textSize(textSize);
+  //textAlign(CENTER);
+  text("Time", (graphRight + graphLeft)/2, graphBottom + textSize * 3);
+  text("V (mV)", graphLeft, graphTop - textSize);
+}
+
+void serialEvent(Serial whichPort) {
+  int lf = 10;    // Linefeed in ASCII
+  String inString = null;  // Input string from serial port
+  int voltage = 0;
+
+  inString = whichPort.readStringUntil(lf);
+  if (inString == null)
+  {    
+    return;
+  }
+
+  inString = trim(inString);
+  voltage = int(inString);
+
+  if (isFirstRead == 1)
+  {
+    print("Discard first read: ");
+    println(inString);
+    isFirstRead = 0;
+    return;
+  }
+
+  buffer[bufferNumber] = voltage;
+  bufferTime[bufferNumber] = millis();
+
+  if (bufferNumber < bufferSize-1)
+  {
+    bufferNumber++;
+  } else 
+  {
+    // bufferNumber == bufferSize-1
+    // That means buffer is full.
+    // Compress data: compute the mean.
+
+    float sum = 0;
+    int i = 0;
+    float yMean = 0;
+    String s = null;
+
+
+
+    sum = 0;
+    for (i=0; i<bufferSize; i++)
+    {
+      sum = sum + buffer[i];
+    }
+    yMean = sum / bufferSize;
+
+
+    bufferNumber = 0;
+
+    if (dataNumber == 0)
+    {
+      maxData = yMean;
+      minData = yMean;
+    } else {
+      if (yMean > maxData)
+      {
+        maxData = yMean;
+      }
+
+      if (yMean < minData)
+      {
+        minData = yMean;
+      }
+    }
+
+    data[dataNumber] = yMean;
+    s = "data[" + dataNumber + "] = " + data[dataNumber];
+    println(s);
+    dataNumber++;
+  }
+}
+
+
 
 boolean mouseInZoomArea(int x, int y)
 {
@@ -116,19 +373,6 @@ boolean mouseInZoomArea(int x, int y)
 //  }
 //}
 
-
-void setup()
-{
-  // Set window title to show version number
-  surface.setTitle(titleString);
-
-  size(1200, 800);
-  surface.setResizable(true);
-
-  openSerialPort();
-  setStartTimeStamp();
-  setCurrentTimeStamp();
-}
 
 
 // For now, this works for 2017~2019 only!
@@ -318,7 +562,7 @@ String numberToTime(float number)
   hourNumber = number - dayInt;
   hourInt = int(hourNumber * 24);
   
-  minuteNumber = hourNumber - (hourInt / 24.0); //<>//
+  minuteNumber = hourNumber - (hourInt / 24.0);
   minuteInt = int(minuteNumber * 1440);
   
   secondNumber = minuteNumber - (minuteInt / 1440.0);
@@ -329,21 +573,6 @@ String numberToTime(float number)
   return timeString;
 }
 
-
-
-void   openSerialPort()
-{
-  int lf = 10;    // Linefeed in ASCII
-  Serial myPort;  // The serial port
-
-  // List all the available serial ports
-  print("Available serial ports: ");
-  printArray(Serial.list());
-
-  myPort = new Serial(this, Serial.list()[0], 9600);
-  myPort.clear(); // Clear buffer
-  myPort.bufferUntil(lf); // Trigger serialEvent() only after linefeed is read.
-}
 
 
 Boolean isLeapYear(int year)
@@ -414,227 +643,4 @@ void setCurrentTimeStamp()
   halfTimeNumber = (startTimeNumber + currentTimeNumber) / 2;
   halfDateString = numberToDate(halfTimeNumber);
   halfTimeString = numberToTime(halfTimeNumber);
-}
-
-
-void draw()
-{
-  background(0);  // black background
-  stroke(0);
-  fill(0);
-
-  // Set the location of graph
-  graphLeft = 80;
-  graphRight = width - 50;
-  graphTop = 50;
-  graphBottom = height - 100;
-  maxTime = graphRight - graphLeft;
-
-  setCurrentTimeStamp();
-  plotSelectRange();
-  plotAxes();
-  plotData(graphLeft, graphRight, graphBottom, graphTop);
-}
-
-
-void plotData(int leftBorder, int rightBorder, int bottomBorder, int topBorder) {
-  float x1 = 0;
-  float y1 = 0;
-  float x2 = 0;
-  float y2 = 0;
-
-  stroke(255); // white
-
-  if (dataNumber < 1) {
-    return;
-  }
-
-  if (dataNumber == 1) {
-    point(leftBorder, bottomBorder);
-    return;
-  }
-
-  // set first point
-  x1 = leftBorder;
-  y1 = map(data[0], minData, maxData, bottomBorder, topBorder);
-
-  // plot lines
-  for (int i=1; i<dataNumber; i++)
-  {
-    x2 = map(i, 0, dataNumber-1, leftBorder, rightBorder); // auto range
-    y2 = map(data[i], minData, maxData, bottomBorder, topBorder); // auto range
-    line(x1, y1, x2, y2);
-    x1 = x2;
-    y1 = y2;
-  }
-}
-
-
-void plotSelectRange()
-{
-  // Set the location of graph
-  selectRangeLeft = graphLeft + 50;
-  selectRangeRight = width - 100;
-  selectRangeBottom = height - 15;
-  selectRangeTop = height - 48;
-
-  int textSize = 12;
-  textSize(textSize);
-
-  stroke(0, 128, 0, 128);
-  fill(0, 128, 0, 128);
-  rect(selectRangeLeft, selectRangeTop, selectRangeRight - selectRangeLeft, selectRangeBottom - selectRangeTop);
-
-  stroke(255);
-  fill(255);
-
-  textAlign(CENTER);
-  text(startTimeString, graphLeft, selectRangeTop + textSize*1);
-  text(startDateString, graphLeft, selectRangeTop + textSize*2.5);
-
-  textAlign(CENTER);
-  text(currentTimeString, graphRight, selectRangeTop + textSize*1);
-  text(currentDateString, graphRight, selectRangeTop + textSize*2.5);
-
-  //stroke(0);
-  //fill(0);
-
-  plotData(selectRangeLeft, selectRangeRight, selectRangeBottom, selectRangeTop);
-}
-
-
-void plotAxes() {
-  int textSize = 12;
-
-  // plot x and y axes as a box
-  stroke(0, 128, 0);
-
-  // plot x-axis
-  line(graphLeft, graphBottom, graphRight, graphBottom); 
-  line(graphLeft, graphTop, graphRight, graphTop); 
-  line(graphLeft, (graphBottom + graphTop)/2, graphRight, (graphBottom + graphTop)/2); 
-
-  // plot y-axis
-  line(graphLeft, graphBottom, graphLeft, graphTop); 
-  line(graphRight, graphBottom, graphRight, graphTop); 
-  line((graphLeft + graphRight)/2, graphBottom, (graphLeft + graphRight)/2, graphTop); 
-
-  // plot graph title and captions
-  stroke(255);
-  fill(255);
-
-  textAlign(CENTER);
-  textSize = 24;
-  textSize(textSize);
-  text("Air Voltage", (graphLeft+graphRight)/2, graphTop - textSize);
-
-  textSize = 16;
-  textSize(textSize);
-  text("Time", (graphRight + graphLeft)/2, graphBottom + textSize * 3);
-  text("V (mV)", graphLeft, graphTop - textSize);
-
-  textSize = 12;
-  textSize(textSize);
-  textAlign(RIGHT);
-
-  text(minData, graphLeft - textSize/2, graphBottom + textSize/2);
-  text(maxData, graphLeft - textSize/2, graphTop + textSize/2);
-  text((minData + maxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
-
-  textAlign(CENTER);
-  text(startTimeString, graphLeft, graphBottom + textSize*1.5);
-  text(startDateString, graphLeft, graphBottom + textSize*2.5);
-  //text(startTimeNumber, graphLeft, graphBottom + textSize*3.5);
-
-  //textAlign(CENTER);
-  text(currentTimeString, graphRight, graphBottom + textSize*1.5);
-  text(currentDateString, graphRight, graphBottom + textSize*2.5);
-  //text(currentTimeNumber, graphRight, graphBottom + textSize*3.5);  
-  
-  // Show date and time for central x
-  text(halfTimeString, (graphLeft+graphRight)/2, graphBottom + textSize*1.5);
-  text(halfDateString, (graphLeft+graphRight)/2, graphBottom + textSize*2.5);
-  //text(halfTimeNumber, (graphLeft+graphRight)/2, graphBottom + textSize*3.5);  
-
-  //textAlign(CENTER);
-
-  textSize = 16;
-  textSize(textSize);
-  //textAlign(CENTER);
-  text("Time", (graphRight + graphLeft)/2, graphBottom + textSize * 3);
-  text("V (mV)", graphLeft, graphTop - textSize);
-}
-
-void serialEvent(Serial whichPort) {
-  int lf = 10;    // Linefeed in ASCII
-  String inString = null;  // Input string from serial port
-  int voltage = 0;
-
-  inString = whichPort.readStringUntil(lf);
-  if (inString == null)
-  {    
-    return;
-  }
-
-  inString = trim(inString);
-  voltage = int(inString);
-
-  if (isFirstRead == 1)
-  {
-    print("Discard first read: ");
-    println(inString);
-    isFirstRead = 0;
-    return;
-  }
-
-  buffer[bufferNumber] = voltage;
-  bufferTime[bufferNumber] = millis();
-
-  if (bufferNumber < bufferSize-1)
-  {
-    bufferNumber++;
-  } else 
-  {
-    // bufferNumber == bufferSize-1
-    // That means buffer is full.
-    // Compress data: compute the mean.
-
-    float sum = 0;
-    int i = 0;
-    float yMean = 0;
-    String s = null;
-
-
-
-    sum = 0;
-    for (i=0; i<bufferSize; i++)
-    {
-      sum = sum + buffer[i];
-    }
-    yMean = sum / bufferSize;
-
-
-    bufferNumber = 0;
-
-    if (dataNumber == 0)
-    {
-      maxData = yMean;
-      minData = yMean;
-    } else {
-      if (yMean > maxData)
-      {
-        maxData = yMean;
-      }
-
-      if (yMean < minData)
-      {
-        minData = yMean;
-      }
-    }
-
-    data[dataNumber] = yMean;
-    s = "data[" + dataNumber + "] = " + data[dataNumber];
-    println(s);
-    dataNumber++;
-  }
 }
