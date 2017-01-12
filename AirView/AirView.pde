@@ -36,22 +36,34 @@
 // 2017-01-05 00:05 UTC+8 AirView V3.1.6 Change timeToDate() to numberToTime()
 // 2017-01-07 07:17 UTC+8 AirView V3.1.7 Show date and time for central x 
 // 2017-01-11 09:55 UTC+8 AirView V3.1.8 Change Select Area from fill to lines to fix ghost lines
+// 2017-01-12 13:44 UTC+8 AirView V3.1.9 Use GregorianCalendar
 
+import java.util.*;
 import processing.serial.*;
-String titleString = "AirView V3.1.8";
+String titleString = "AirView V3.1.9";
 
-int startTime = 0;
-int currentTime = 0;
+//long startTime = 0;
+//long currentTime = 0;
+//int startTime = 0;
+//int currentTime = 0;
 
-float startTimeNumber = 0.0;
+GregorianCalendar startCalendar = null;
+//Date startDate = null;
+long startTime = 0;
+//float startTimeNumber = 0.0;
 String startTimeString = "";
 String startDateString = "";
 
-float currentTimeNumber = 0.0;
+GregorianCalendar currentCalendar = null;
+//Date currentDate = null;
+long currentTime = 0;
+//float currentTimeNumber = 0.0;
 String currentTimeString = "";
 String currentDateString = "";
 
-float halfTimeNumber = 0.0;
+GregorianCalendar halfCalendar = null;
+long halfTime = 0;
+//float halfTimeNumber = 0.0;
 String halfTimeString = "";
 String halfDateString = "";
 
@@ -87,7 +99,7 @@ int dataNumber = 0;
 
 
 void setup()
-{
+{ //<>//
   // Set window title to show version number
   surface.setTitle(titleString);
 
@@ -99,7 +111,7 @@ void setup()
   setCurrentTimeStamp();
 }
 
- //<>//
+
 void   openSerialPort()
 {
   int lf = 10;    // Linefeed in ASCII
@@ -378,269 +390,327 @@ boolean mouseInZoomArea(int x, int y)
 // For now, this works for 2017~2019 only!
 // Need to modify it later.
 // 1.0 == 2017-01-01 00:00:00
-float dateAndTimeToNumber(int yearInt, int monthInt, int dayInt, int hourInt, int minuteInt, int secondInt)
-{
-  float days = 0.0;
-  int daysOfFebruary = 28;
+//float dateAndTimeToNumber(int yearInt, int monthInt, int dayInt, int hourInt, int minuteInt, int secondInt)
+//{
+//  float days = 0.0;
+//  int daysOfFebruary = 28;
 
-  if (isLeapYear(yearInt))
-  {
-    daysOfFebruary = 29;
-  }
+//  if (isLeapYear(yearInt))
+//  {
+//    daysOfFebruary = 29;
+//  }
 
-  // For now, this will work for 2017 only!
-  // Need to modify it later.
-  // 0.0 == 2017-01-01 00:00:00
-  if ((yearInt < 2017) || (yearInt > 2017))
-  {
-    println("For now, this works for 2017 only!");
-    return 0.0;
-  }
+//  // For now, this will work for 2017 only!
+//  // Need to modify it later.
+//  // 0.0 == 2017-01-01 00:00:00
+//  if ((yearInt < 2017) || (yearInt > 2017))
+//  {
+//    println("For now, this works for 2017 only!");
+//    return 0.0;
+//  }
 
-  days += (yearInt - 2017) * 365.0;
+//  days += (yearInt - 2017) * 365.0;
 
-  switch(monthInt) 
-  {
-  case 1: 
-    // do nothing.
-    break;
-  case 2: 
-    days += 31;
-    break;
-  case 3: 
-    days += 31 + daysOfFebruary;
-    break;
-  case 4: 
-    days += 31 + daysOfFebruary + 31;
-    break;
-  case 5: 
-    days += 31 + daysOfFebruary + 31 + 30;
-    break;
-  case 6: 
-    days += 31 + daysOfFebruary + 31 + 30 + 31;
-    break;
-  case 7: 
-    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30;
-    break;
-  case 8: 
-    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31;
-    break;
-  case 9: 
-    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31;
-    break;
-  case 10: 
-    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30;
-    break;
-  case 11: 
-    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31;
-    break;
-  case 12: 
-    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30;
-    break;
-   default:
-    println("Incorrect Month: " + monthInt);
-    break;
-  }
+//  switch(monthInt) 
+//  {
+//  case 1: 
+//    // do nothing.
+//    break;
+//  case 2: 
+//    days += 31;
+//    break;
+//  case 3: 
+//    days += 31 + daysOfFebruary;
+//    break;
+//  case 4: 
+//    days += 31 + daysOfFebruary + 31;
+//    break;
+//  case 5: 
+//    days += 31 + daysOfFebruary + 31 + 30;
+//    break;
+//  case 6: 
+//    days += 31 + daysOfFebruary + 31 + 30 + 31;
+//    break;
+//  case 7: 
+//    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30;
+//    break;
+//  case 8: 
+//    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31;
+//    break;
+//  case 9: 
+//    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31;
+//    break;
+//  case 10: 
+//    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30;
+//    break;
+//  case 11: 
+//    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31;
+//    break;
+//  case 12: 
+//    days += 31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30;
+//    break;
+//   default:
+//    println("Incorrect Month: " + monthInt);
+//    break;
+//  }
 
-  days += dayInt;
-  days += hourInt / 24.0;
-  days += minuteInt /1440.0;
-  days += secondInt / 86400.0;
+//  days += dayInt;
+//  days += hourInt / 24.0;
+//  days += minuteInt /1440.0;
+//  days += secondInt / 86400.0;
 
-  return days;
-}
+//  return days;
+//}
 
 
 // For now, this will work for 2017 only!
 // Need to modify it later.
 // 0.0 == 2017-01-01 00:00:00
-String numberToDate(float number)
-{
-  int yearInt;
-  int monthInt;
-  int dayInt;
-  String dateString;
+//String numberToDate(float number)
+//{
+//  int yearInt;
+//  int monthInt;
+//  int dayInt;
+//  String dateString;
   
-  int daysOfFebruary = 28;
+//  int daysOfFebruary = 28;
   
-  yearInt = 2017;
+//  yearInt = 2017;
   
-  if (isLeapYear(yearInt))
-  {
-    daysOfFebruary = 29;
-  }
+//  if (isLeapYear(yearInt))
+//  {
+//    daysOfFebruary = 29;
+//  }
 
-  dayInt = int(number);
+//  dayInt = int(number);
   
-  if (dayInt <= (31)) 
-  {
-    monthInt = 1;
-    dayInt = dayInt;
-  }
-  else if (dayInt <= (31 + daysOfFebruary))
-  {
-    monthInt = 2;
-    dayInt = dayInt - (31);
-  }
-  else if (dayInt <= (31 + daysOfFebruary + 31))
-  {
-    monthInt = 3;
-    dayInt = dayInt - (31 + daysOfFebruary);
-  }
-  else if (dayInt <= (31 + daysOfFebruary + 31 + 30))
-  {
-    monthInt = 4;
-    dayInt = dayInt - (31 + daysOfFebruary + 31);
-  }
-  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31))
-  {
-    monthInt = 5;
-    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30);
-  }
-  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30))
-  {
-    monthInt = 6;
-    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31);
-  }
-  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31))
-  {
-    monthInt = 7;
-    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30);
-  }
-  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31))
-  {
-    monthInt = 8;
-    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31);
-  }
-  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30))
-  {
-    monthInt = 9;
-    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31);
-  }
-  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31))
-  {
-    monthInt = 10;
-    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30);
-  }
-  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30))
-  {
-    monthInt = 11;
-    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31);
-  }
-  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31))
-  {
-    monthInt = 12;
-    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30);
-  }
-  else
-  {
-    monthInt = 13;
-    dayInt = 0;
-    println("Incorrect Month: " + monthInt);
-  }
+//  if (dayInt <= (31)) 
+//  {
+//    monthInt = 1;
+//    dayInt = dayInt;
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary))
+//  {
+//    monthInt = 2;
+//    dayInt = dayInt - (31);
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary + 31))
+//  {
+//    monthInt = 3;
+//    dayInt = dayInt - (31 + daysOfFebruary);
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary + 31 + 30))
+//  {
+//    monthInt = 4;
+//    dayInt = dayInt - (31 + daysOfFebruary + 31);
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31))
+//  {
+//    monthInt = 5;
+//    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30);
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30))
+//  {
+//    monthInt = 6;
+//    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31);
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31))
+//  {
+//    monthInt = 7;
+//    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30);
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31))
+//  {
+//    monthInt = 8;
+//    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31);
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30))
+//  {
+//    monthInt = 9;
+//    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31);
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31))
+//  {
+//    monthInt = 10;
+//    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30);
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30))
+//  {
+//    monthInt = 11;
+//    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31);
+//  }
+//  else if (dayInt <= (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31))
+//  {
+//    monthInt = 12;
+//    dayInt = dayInt - (31 + daysOfFebruary + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30);
+//  }
+//  else
+//  {
+//    monthInt = 13;
+//    dayInt = 0;
+//    println("Incorrect Month: " + monthInt);
+//  }
 
-  dateString = yearInt + "-" + nf(monthInt, 2) + "-" + nf(dayInt, 2);
-  return dateString;
-}
+//  dateString = yearInt + "-" + nf(monthInt, 2) + "-" + nf(dayInt, 2);
+//  return dateString;
+//}
 
 
 // 0.0 == 2017-01-01 00:00:00
-String numberToTime(float number)
-{
-  float hourNumber;
-  float minuteNumber;
-  float secondNumber;  
+//String numberToTime(float number)
+//{
+//  float hourNumber;
+//  float minuteNumber;
+//  float secondNumber;  
 
-  int dayInt;
-  int hourInt;
-  int minuteInt;
-  int secondInt;
+//  int dayInt;
+//  int hourInt;
+//  int minuteInt;
+//  int secondInt;
   
-  String timeString;
+//  String timeString;
   
-  dayInt = int(number);
-  hourNumber = number - dayInt;
-  hourInt = int(hourNumber * 24);
+//  dayInt = int(number);
+//  hourNumber = number - dayInt;
+//  hourInt = int(hourNumber * 24);
   
-  minuteNumber = hourNumber - (hourInt / 24.0);
-  minuteInt = int(minuteNumber * 1440);
+//  minuteNumber = hourNumber - (hourInt / 24.0);
+//  minuteInt = int(minuteNumber * 1440);
   
-  secondNumber = minuteNumber - (minuteInt / 1440.0);
-  secondInt = round(secondNumber * 86400);
+//  secondNumber = minuteNumber - (minuteInt / 1440.0);
+//  secondInt = round(secondNumber * 86400);
   
-  timeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+//  timeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
   
-  return timeString;
-}
+//  return timeString;
+//}
 
 
 
-Boolean isLeapYear(int year)
-{
-  int remainder = 0;
+//Boolean isLeapYear(int year)
+//{
+//  int remainder = 0;
 
-  remainder = year % 400;
-  if (remainder == 0)
-  {
-    return true;
-  }
+//  remainder = year % 400;
+//  if (remainder == 0)
+//  {
+//    return true;
+//  }
 
-  remainder = year % 100;
-  if (remainder == 0)
-  {
-    return false;
-  }
+//  remainder = year % 100;
+//  if (remainder == 0)
+//  {
+//    return false;
+//  }
 
-  remainder = year % 4;
-  if (remainder == 0)
-  {
-    return true;
-  }
+//  remainder = year % 4;
+//  if (remainder == 0)
+//  {
+//    return true;
+//  }
 
-  return false;
-}
+//  return false;
+//}
 
 
 
 
 void setStartTimeStamp()
 {
-  int yearInt = year();
-  int monthInt = month();
-  int dayInt = day();
-  int hourInt = hour();
-  int minuteInt = minute();
-  int secondInt = second();
+  int yearInt = 0;
+  int monthInt = 0;
+  int dateInt = 0;
+  int hourInt = 0;
+  int minuteInt = 0;
+  int secondInt = 0;
+  //int yearInt = year();
+  //int monthInt = month();
+  //int dayInt = day();
+  //int hourInt = hour();
+  //int minuteInt = minute();
+  //int secondInt = second();
+    
+  startCalendar = new GregorianCalendar();
+  startTime = startCalendar.getTimeInMillis();
   
-  startTime = millis();
+  yearInt = startCalendar.get(Calendar.YEAR);
+  monthInt = startCalendar.get(Calendar.MONTH) + 1;
+  dateInt = startCalendar.get(Calendar.DATE);
   
-  //startTimeString = nf(hour(), 2) + ":" + nf(minute(), 2) + ":" + nf(second(), 2);
-  //startDateString = year() + "-" + nf(month(), 2) + "-" + nf(day(), 2);
+  hourInt = startCalendar.get(Calendar.HOUR_OF_DAY);
+  minuteInt = startCalendar.get(Calendar.MINUTE);
+  secondInt = startCalendar.get(Calendar.SECOND);
   
-  startTimeNumber = dateAndTimeToNumber(yearInt, monthInt, dayInt, hourInt, minuteInt, secondInt);  
-  startDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dayInt, 2);
+  startDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dateInt, 2);
   startTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+
+  //startDate = new Date();
+  //startTime = startDate.getTime( );
+  // startTime = millis();
+    
+  //startTimeNumber = dateAndTimeToNumber(yearInt, monthInt, dayInt, hourInt, minuteInt, secondInt);  
+  //startDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dayInt, 2);
+  //startTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
 }
 
 
 void setCurrentTimeStamp()
 {
-  int yearInt = year();
-  int monthInt = month();
-  int dayInt = day();
-  int hourInt = hour();
-  int minuteInt = minute();
-  int secondInt = second();
-   
-  currentTime = millis();
-  
-  //currentTimeString = nf(hour(), 2) + ":" + nf(minute(), 2) + ":" + nf(second(), 2);
-  //currentDateString = year() + "-" + nf(month(), 2) + "-" + nf(day(), 2);
-  currentTimeNumber = dateAndTimeToNumber(yearInt, monthInt, dayInt, hourInt, minuteInt, secondInt);
-  currentDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dayInt, 2);
-  currentTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+  int yearInt = 0;
+  int monthInt = 0;
+  int dateInt = 0;
+  int hourInt = 0;
+  int minuteInt = 0;
+  int secondInt = 0;
 
-  halfTimeNumber = (startTimeNumber + currentTimeNumber) / 2;
-  halfDateString = numberToDate(halfTimeNumber);
-  halfTimeString = numberToTime(halfTimeNumber);
+  //int yearInt = year();
+  //int monthInt = month();
+  //int dayInt = day();
+  //int hourInt = hour();
+  //int minuteInt = minute();
+  //int secondInt = second();
+  
+  currentCalendar = new GregorianCalendar();
+  currentTime = currentCalendar.getTimeInMillis();
+  
+  yearInt = currentCalendar.get(Calendar.YEAR);
+  monthInt = currentCalendar.get(Calendar.MONTH) + 1;
+  dateInt = currentCalendar.get(Calendar.DATE);
+  
+  hourInt = currentCalendar.get(Calendar.HOUR_OF_DAY);
+  minuteInt = currentCalendar.get(Calendar.MINUTE);
+  secondInt = currentCalendar.get(Calendar.SECOND);
+  
+  currentDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dateInt, 2);
+  currentTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+  
+
+  //currentTime = millis();
+  //currentDate = new Date();
+  //currentTime = currentDate.getTime( );
+
+  //currentTimeNumber = dateAndTimeToNumber(yearInt, monthInt, dayInt, hourInt, minuteInt, secondInt);
+  
+  //currentDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dayInt, 2);
+  //currentTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+
+  halfTime = (startTime + currentTime) / 2;
+  halfCalendar = new GregorianCalendar();
+  halfCalendar.setTimeInMillis(halfTime);
+  
+  yearInt = halfCalendar.get(Calendar.YEAR);
+  monthInt = halfCalendar.get(Calendar.MONTH) + 1;
+  dateInt = halfCalendar.get(Calendar.DATE);
+  
+  hourInt = halfCalendar.get(Calendar.HOUR_OF_DAY);
+  minuteInt = halfCalendar.get(Calendar.MINUTE);
+  secondInt = halfCalendar.get(Calendar.SECOND);
+  
+  halfDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dateInt, 2);
+  halfTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+  
+  
+  // halfTimeNumber = (startTimeNumber + currentTimeNumber) / 2;
+  //halfDateString = numberToDate(halfTimeNumber);
+  //halfTimeString = numberToTime(halfTimeNumber);
 }
