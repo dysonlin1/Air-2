@@ -39,10 +39,11 @@
 // 2017-01-12 13:44 UTC+8 AirView V3.1.9 Use GregorianCalendar
 // 2017-01-19 14:12 UTC+8 AirView V3.2.0 detectMouse(): Show mouse position in Select Area
 // 2017-01-20 14:07 UTC+8 AirView V3.2.1 Detect mousePressed for left button
+// 2017-01-20 17:10 UTC+8 AirView V3.2.2 Select Range for the left
 
 import java.util.*;
 import processing.serial.*;
-String titleString = "AirView V3.2.1";
+String titleString = "AirView V3.2.2";
 
 GregorianCalendar startCalendar = null;
 long startTime = 0;
@@ -59,6 +60,12 @@ long halfTime = 0;
 String halfTimeString = "";
 String halfDateString = "";
 
+int selectLeftDataNumber = 1;
+GregorianCalendar selectLeftCalendar = null;
+long selectLeftTime = 0;
+String selectLeftTimeString = "";
+String selectLeftDateString = "";
+
 int graphLeft = 0;
 int graphRight = 0;
 int graphTop = 0;
@@ -72,11 +79,14 @@ int selectLeft = 0;
 
 int isFirstRead = 1;
 
-float maxData = 1;
-float minData = 0;
+float maxData = 0.0;
+float minData = 0.0;
+float rangeMaxData = 0.0;
+float rangeMinData = 0.0;
 
-int maxTime = 0;
-int minTime = 0;
+
+//int maxTime = 0;
+//int minTime = 0;
 
 final int compressionRatio = 128;
 
@@ -131,7 +141,7 @@ void draw()
   graphRight = width - 50;
   graphTop = 50;
   graphBottom = height - 100;
-  maxTime = graphRight - graphLeft;
+  //maxTime = graphRight - graphLeft;
 
   setCurrentTimeStamp();
   plotSelectRange();
@@ -139,17 +149,24 @@ void draw()
   
   detectMouse();
   
-  plotData(graphLeft, graphRight, graphBottom, graphTop);
+  plotData(selectLeftDataNumber, graphLeft, graphRight, graphBottom, graphTop);
 }
 
 
-void plotData(int leftBorder, int rightBorder, int bottomBorder, int topBorder) {
+void plotData(int leftDataNumber, int leftBorder, int rightBorder, int bottomBorder, int topBorder) 
+{ 
   float x1 = 0;
   float y1 = 0;
   float x2 = 0;
   float y2 = 0;
 
   stroke(255); // white
+  
+  
+  if (leftDataNumber < 1)
+  {
+    return;
+  }
 
   if (dataNumber < 1) {
     return;
@@ -159,16 +176,38 @@ void plotData(int leftBorder, int rightBorder, int bottomBorder, int topBorder) 
     point(leftBorder, bottomBorder);
     return;
   }
+  
+  rangeMaxData = data[leftDataNumber - 1];
+  rangeMinData = data[leftDataNumber - 1];
+  
+  for (int i=leftDataNumber; i<dataNumber; i++)
+  {
+    if (data[i] > rangeMaxData)
+    {
+      rangeMaxData = data[i];
+    }
+    else 
+    {
+      if (data[i] < rangeMinData)
+      {
+        rangeMinData = data[i];
+      }
+    }
+  }
 
   // set first point
   x1 = leftBorder;
-  y1 = map(data[0], minData, maxData, bottomBorder, topBorder);
+  y1 = map(data[leftDataNumber - 1], rangeMinData, rangeMaxData, bottomBorder, topBorder);
+  //y1 = map(data[0], minData, maxData, bottomBorder, topBorder);
 
   // plot lines
-  for (int i=1; i<dataNumber; i++)
+  for (int i=leftDataNumber; i<dataNumber; i++)
+  //  for (int i=1; i<dataNumber; i++)
   {
-    x2 = map(i, 0, dataNumber-1, leftBorder, rightBorder); // auto range
-    y2 = map(data[i], minData, maxData, bottomBorder, topBorder); // auto range
+    x2 = map(i, leftDataNumber-1, dataNumber-1, leftBorder, rightBorder); // auto range
+    //x2 = map(i, 0, dataNumber-1, leftBorder, rightBorder); // auto range
+    y2 = map(data[i], rangeMinData, rangeMaxData, bottomBorder, topBorder); // auto range
+    //y2 = map(data[i], minData, maxData, bottomBorder, topBorder); // auto range
     line(x1, y1, x2, y2);
     x1 = x2;
     y1 = y2;
@@ -184,9 +223,15 @@ void detectMouse()
   stroke(0, 128, 0, 128);
   fill(0, 128, 0, 128);
   
+  if (selectLeft < selectRangeLeft)
+  {
+    selectLeft = selectRangeLeft;
+  }
+
+  
   // Show mouse position in Select Area
   if ((x >= (selectRangeLeft - 5)) && (x <= (selectRangeRight + 5)) &&
-      (y >= selectRangeTop) && (y <= selectRangeBottom))
+      (y >= selectRangeTop - 5) && (y <= selectRangeBottom + 5))
   {
     if (x < selectRangeLeft)
     {
@@ -215,8 +260,15 @@ void detectMouse()
     {
       selectLeft = selectRangeRight - 3;
     }
+    
+    if (selectLeft > selectRangeLeft) 
+    {
+      setSelectLeftTimeStamp(selectLeft);
+    }
   }
 }
+
+
 
 
 void plotSelectRange()
@@ -266,7 +318,7 @@ void plotSelectRange()
   //stroke(0);
   //fill(0);
 
-  plotData(selectRangeLeft, selectRangeRight, selectRangeBottom, selectRangeTop);
+  plotData(1, selectRangeLeft, selectRangeRight, selectRangeBottom, selectRangeTop);
 }
 
 
@@ -304,9 +356,12 @@ void plotAxes() {
   textSize(textSize);
   textAlign(RIGHT);
 
-  text(minData, graphLeft - textSize/2, graphBottom + textSize/2);
-  text(maxData, graphLeft - textSize/2, graphTop + textSize/2);
-  text((minData + maxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
+  text(rangeMinData, graphLeft - textSize/2, graphBottom + textSize/2);
+  text(rangeMaxData, graphLeft - textSize/2, graphTop + textSize/2);
+  text((rangeMinData + rangeMaxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
+  //text(minData, graphLeft - textSize/2, graphBottom + textSize/2);
+  //text(maxData, graphLeft - textSize/2, graphTop + textSize/2);
+  //text((minData + maxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
 
   textAlign(CENTER);
   text(startTimeString, graphLeft, graphBottom + textSize*1.5);
@@ -455,18 +510,73 @@ void setCurrentTimeStamp()
   currentDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dateInt, 2);
   currentTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
   
-  halfTime = (startTime + currentTime) / 2;
-  halfCalendar = new GregorianCalendar();
-  halfCalendar.setTimeInMillis(halfTime);
+  setHalfTimeStamp();
   
-  yearInt = halfCalendar.get(Calendar.YEAR);
-  monthInt = halfCalendar.get(Calendar.MONTH) + 1;
-  dateInt = halfCalendar.get(Calendar.DATE);
+  //halfTime = (startTime + currentTime) / 2;
+  //halfCalendar = new GregorianCalendar();
+  //halfCalendar.setTimeInMillis(halfTime);
   
-  hourInt = halfCalendar.get(Calendar.HOUR_OF_DAY);
-  minuteInt = halfCalendar.get(Calendar.MINUTE);
-  secondInt = halfCalendar.get(Calendar.SECOND);
+  //yearInt = halfCalendar.get(Calendar.YEAR);
+  //monthInt = halfCalendar.get(Calendar.MONTH) + 1;
+  //dateInt = halfCalendar.get(Calendar.DATE);
   
-  halfDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dateInt, 2);
-  halfTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+  //hourInt = halfCalendar.get(Calendar.HOUR_OF_DAY);
+  //minuteInt = halfCalendar.get(Calendar.MINUTE);
+  //secondInt = halfCalendar.get(Calendar.SECOND);
+  
+  //halfDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dateInt, 2);
+  //halfTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
  }
+ 
+ void setHalfTimeStamp()
+ {
+   int yearInt = 0;
+   int monthInt = 0;
+   int dateInt = 0;
+   int hourInt = 0;
+   int minuteInt = 0;
+   int secondInt = 0;
+  
+   halfTime = (startTime + currentTime) / 2;
+   halfCalendar = new GregorianCalendar();
+   halfCalendar.setTimeInMillis(halfTime);
+  
+   yearInt = halfCalendar.get(Calendar.YEAR);
+   monthInt = halfCalendar.get(Calendar.MONTH) + 1;
+   dateInt = halfCalendar.get(Calendar.DATE);
+  
+   hourInt = halfCalendar.get(Calendar.HOUR_OF_DAY);
+   minuteInt = halfCalendar.get(Calendar.MINUTE);
+   secondInt = halfCalendar.get(Calendar.SECOND);
+  
+   halfDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dateInt, 2);
+   halfTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+}
+
+
+void setSelectLeftTimeStamp(int selectLeft)
+{
+   int yearInt = 0;
+   int monthInt = 0;
+   int dateInt = 0;
+   int hourInt = 0;
+   int minuteInt = 0;
+   int secondInt = 0;
+  
+   selectLeftDataNumber = round(map(selectLeft, selectRangeLeft, selectRangeRight, 1, dataNumber - 1));
+   selectLeftTime = round(map(selectLeft, selectRangeLeft, selectRangeRight, startTime, currentTime));
+   //selectLeftTime = (startTime + currentTime) / 2;
+   selectLeftCalendar = new GregorianCalendar();
+   selectLeftCalendar.setTimeInMillis(selectLeftTime);
+  
+   yearInt = selectLeftCalendar.get(Calendar.YEAR);
+   monthInt = selectLeftCalendar.get(Calendar.MONTH) + 1;
+   dateInt = selectLeftCalendar.get(Calendar.DATE);
+  
+   hourInt = selectLeftCalendar.get(Calendar.HOUR_OF_DAY);
+   minuteInt = selectLeftCalendar.get(Calendar.MINUTE);
+   secondInt = selectLeftCalendar.get(Calendar.SECOND);
+  
+   selectLeftDateString = nf(yearInt, 4) + "-" + nf(monthInt, 2) + "-" + nf(dateInt, 2);
+   selectLeftTimeString = nf(hourInt, 2) + ":" + nf(minuteInt, 2) + ":" + nf(secondInt, 2);
+}
