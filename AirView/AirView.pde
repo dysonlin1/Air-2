@@ -38,10 +38,11 @@
 // 2017-01-11 09:55 UTC+8 AirView V3.1.8 Change Select Area from fill to lines to fix ghost lines
 // 2017-01-12 13:44 UTC+8 AirView V3.1.9 Use GregorianCalendar
 // 2017-01-19 14:12 UTC+8 AirView V3.2.0 detectMouse(): Show mouse position in Select Area
+// 2017-01-20 14:07 UTC+8 AirView V3.2.1 Detect mousePressed for left button
 
 import java.util.*;
 import processing.serial.*;
-String titleString = "AirView V3.2.0";
+String titleString = "AirView V3.2.1";
 
 GregorianCalendar startCalendar = null;
 long startTime = 0;
@@ -67,6 +68,7 @@ int selectRangeLeft = 0;
 int selectRangeRight = 0;
 int selectRangeTop = 0;
 int selectRangeBottom = 0;
+int selectLeft = 0;
 
 int isFirstRead = 1;
 
@@ -183,10 +185,36 @@ void detectMouse()
   fill(0, 128, 0, 128);
   
   // Show mouse position in Select Area
-  if ((x >= selectRangeLeft) && (x <= selectRangeRight) &&
+  if ((x >= (selectRangeLeft - 5)) && (x <= (selectRangeRight + 5)) &&
       (y >= selectRangeTop) && (y <= selectRangeBottom))
   {
+    if (x < selectRangeLeft)
+    {
+      x = selectRangeLeft;
+    }
+    
+    if (x > selectRangeRight - 3)
+    {
+      x = selectRangeRight - 3;
+    }
+       
     line(x, selectRangeBottom, x, selectRangeTop);
+  }
+  
+  // Detect mousePressed for left button
+  if (mousePressed && (mouseButton == LEFT))
+  {
+    selectLeft = mouseX;
+    
+    if (selectLeft < selectRangeLeft)
+    {
+      selectLeft = selectRangeLeft;
+    }
+    
+    if (selectLeft > selectRangeRight - 3)
+    {
+      selectLeft = selectRangeRight - 3;
+    }
   }
 }
 
@@ -199,6 +227,16 @@ void plotSelectRange()
   selectRangeBottom = height - 15;
   selectRangeTop = height - 48;
   
+  if (selectLeft < selectRangeLeft)
+  {
+    selectLeft = selectRangeLeft;
+  }
+  
+  if (selectLeft > selectRangeRight - 3)
+  {
+    selectLeft = selectRangeRight - 3;
+  }
+
   int textSize = 12;
   textSize(textSize);
 
@@ -209,6 +247,10 @@ void plotSelectRange()
   line(selectRangeLeft, selectRangeTop, selectRangeRight, selectRangeTop);
   line(selectRangeLeft, selectRangeBottom, selectRangeLeft, selectRangeTop);
   line(selectRangeRight, selectRangeBottom, selectRangeRight, selectRangeTop);
+  if (selectLeft > selectRangeLeft)
+  {
+    line(selectLeft, selectRangeBottom, selectLeft, selectRangeTop);
+  }
 
   stroke(255);
   fill(255);
