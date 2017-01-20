@@ -40,10 +40,11 @@
 // 2017-01-19 14:12 UTC+8 AirView V3.2.0 detectMouse(): Show mouse position in Select Area
 // 2017-01-20 14:07 UTC+8 AirView V3.2.1 Detect mousePressed for left button
 // 2017-01-20 17:10 UTC+8 AirView V3.2.2 Select Range for the left
+// 2017-01-20 17:36 UTC+8 AirView V3.2.3 Fix left time stamp
 
 import java.util.*;
 import processing.serial.*;
-String titleString = "AirView V3.2.2";
+String titleString = "AirView V3.2.3";
 
 GregorianCalendar startCalendar = null;
 long startTime = 0;
@@ -112,6 +113,7 @@ void setup()
   openSerialPort();
   setStartTimeStamp();
   setCurrentTimeStamp();
+  setSelectLeftTimeStamp(0);
 }
 
 
@@ -142,6 +144,23 @@ void draw()
   graphTop = 50;
   graphBottom = height - 100;
   //maxTime = graphRight - graphLeft;
+  
+  // Set the location of graph
+  selectRangeLeft = graphLeft + 50;
+  selectRangeRight = width - 100;
+  selectRangeBottom = height - 15;
+  selectRangeTop = height - 48;
+  
+  if (selectLeft < selectRangeLeft)
+  {
+    selectLeft = selectRangeLeft;
+  }
+  
+  if (selectLeft > selectRangeRight - 3)
+  {
+    selectLeft = selectRangeRight - 3;
+  }
+
 
   setCurrentTimeStamp();
   plotSelectRange();
@@ -273,22 +292,6 @@ void detectMouse()
 
 void plotSelectRange()
 {
-  // Set the location of graph
-  selectRangeLeft = graphLeft + 50;
-  selectRangeRight = width - 100;
-  selectRangeBottom = height - 15;
-  selectRangeTop = height - 48;
-  
-  if (selectLeft < selectRangeLeft)
-  {
-    selectLeft = selectRangeLeft;
-  }
-  
-  if (selectLeft > selectRangeRight - 3)
-  {
-    selectLeft = selectRangeRight - 3;
-  }
-
   int textSize = 12;
   textSize(textSize);
 
@@ -364,11 +367,11 @@ void plotAxes() {
   //text((minData + maxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
 
   textAlign(CENTER);
-  text(startTimeString, graphLeft, graphBottom + textSize*1.5);
-  text(startDateString, graphLeft, graphBottom + textSize*2.5);
-  //text(startTimeNumber, graphLeft, graphBottom + textSize*3.5);
+  text(selectLeftTimeString, graphLeft, graphBottom + textSize*1.5);
+  text(selectLeftDateString, graphLeft, graphBottom + textSize*2.5); 
+  //text(startTimeString, graphLeft, graphBottom + textSize*1.5);
+  //text(startDateString, graphLeft, graphBottom + textSize*2.5);
 
-  //textAlign(CENTER);
   text(currentTimeString, graphRight, graphBottom + textSize*1.5);
   text(currentDateString, graphRight, graphBottom + textSize*2.5);
   //text(currentTimeNumber, graphRight, graphBottom + textSize*3.5);  
@@ -562,10 +565,19 @@ void setSelectLeftTimeStamp(int selectLeft)
    int hourInt = 0;
    int minuteInt = 0;
    int secondInt = 0;
+   
+   if (selectLeft == 0)
+   {
+     selectLeftDataNumber = 1;
+     selectLeftTime = startTime;
+   }
+   else
+   {
+     selectLeftDataNumber = round(map(selectLeft, selectRangeLeft, selectRangeRight, 1, dataNumber - 1));
+     selectLeftTime = round(map(selectLeft, selectRangeLeft, selectRangeRight, startTime, currentTime));
+     //selectLeftTime = (startTime + currentTime) / 2;
+   }
   
-   selectLeftDataNumber = round(map(selectLeft, selectRangeLeft, selectRangeRight, 1, dataNumber - 1));
-   selectLeftTime = round(map(selectLeft, selectRangeLeft, selectRangeRight, startTime, currentTime));
-   //selectLeftTime = (startTime + currentTime) / 2;
    selectLeftCalendar = new GregorianCalendar();
    selectLeftCalendar.setTimeInMillis(selectLeftTime);
   
