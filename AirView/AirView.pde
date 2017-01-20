@@ -41,10 +41,11 @@
 // 2017-01-20 14:07 UTC+8 AirView V3.2.1 Detect mousePressed for left button
 // 2017-01-20 17:10 UTC+8 AirView V3.2.2 Select Range for the left
 // 2017-01-20 17:36 UTC+8 AirView V3.2.3 Fix left time stamp
+// 2017-01-20 22:54 UTC+8 AirView V3.2.4 Fix setSelectLeftTimeStamp() map() bug: don't use it with long
 
 import java.util.*;
 import processing.serial.*;
-String titleString = "AirView V3.2.3";
+String titleString = "AirView V3.2.4";
 
 GregorianCalendar startCalendar = null;
 long startTime = 0;
@@ -169,6 +170,7 @@ void draw()
   detectMouse();
   
   plotData(selectLeftDataNumber, graphLeft, graphRight, graphBottom, graphTop);
+  plotAxes();
 }
 
 
@@ -241,13 +243,7 @@ void detectMouse()
   
   stroke(0, 128, 0, 128);
   fill(0, 128, 0, 128);
-  
-  if (selectLeft < selectRangeLeft)
-  {
-    selectLeft = selectRangeLeft;
-  }
-
-  
+   
   // Show mouse position in Select Area
   if ((x >= (selectRangeLeft - 5)) && (x <= (selectRangeRight + 5)) &&
       (y >= selectRangeTop - 5) && (y <= selectRangeBottom + 5))
@@ -257,32 +253,35 @@ void detectMouse()
       x = selectRangeLeft;
     }
     
-    if (x > selectRangeRight - 3)
+    if (x > selectRangeRight - 50)
     {
-      x = selectRangeRight - 3;
+      x = selectRangeRight - 50;
     }
        
     line(x, selectRangeBottom, x, selectRangeTop);
-  }
   
-  // Detect mousePressed for left button
-  if (mousePressed && (mouseButton == LEFT))
-  {
-    selectLeft = mouseX;
-    
-    if (selectLeft < selectRangeLeft)
+  
+    // Detect mousePressed for left button
+    if (mousePressed && (mouseButton == LEFT))
     {
-      selectLeft = selectRangeLeft;
-    }
-    
-    if (selectLeft > selectRangeRight - 3)
-    {
-      selectLeft = selectRangeRight - 3;
-    }
-    
-    if (selectLeft > selectRangeLeft) 
-    {
+      selectLeft = mouseX; //<>//
+      
+      if (selectLeft < selectRangeLeft)
+      {
+        selectLeft = selectRangeLeft;
+      }
+      else 
+      {
+        if (selectLeft > selectRangeRight - 50)
+        {
+          selectLeft = selectRangeRight - 50;
+        }
+      }
+      
+      //if (selectLeft >= selectRangeLeft) 
+      //{
       setSelectLeftTimeStamp(selectLeft);
+      //}
     }
   }
 }
@@ -362,26 +361,19 @@ void plotAxes() {
   text(rangeMinData, graphLeft - textSize/2, graphBottom + textSize/2);
   text(rangeMaxData, graphLeft - textSize/2, graphTop + textSize/2);
   text((rangeMinData + rangeMaxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
-  //text(minData, graphLeft - textSize/2, graphBottom + textSize/2);
-  //text(maxData, graphLeft - textSize/2, graphTop + textSize/2);
-  //text((minData + maxData)/2, graphLeft - textSize/2, (graphBottom + graphTop)/2 + textSize/2);
-
+ 
   textAlign(CENTER);
   text(selectLeftTimeString, graphLeft, graphBottom + textSize*1.5);
   text(selectLeftDateString, graphLeft, graphBottom + textSize*2.5); 
-  //text(startTimeString, graphLeft, graphBottom + textSize*1.5);
-  //text(startDateString, graphLeft, graphBottom + textSize*2.5);
-
+ 
   text(currentTimeString, graphRight, graphBottom + textSize*1.5);
   text(currentDateString, graphRight, graphBottom + textSize*2.5);
-  //text(currentTimeNumber, graphRight, graphBottom + textSize*3.5);  
   
   // Show date and time for central x
   text(halfTimeString, (graphLeft+graphRight)/2, graphBottom + textSize*1.5);
   text(halfDateString, (graphLeft+graphRight)/2, graphBottom + textSize*2.5);
   //text(halfTimeNumber, (graphLeft+graphRight)/2, graphBottom + textSize*3.5);  
 
-  //textAlign(CENTER);
 
   textSize = 16;
   textSize(textSize);
@@ -540,7 +532,9 @@ void setCurrentTimeStamp()
    int minuteInt = 0;
    int secondInt = 0;
   
-   halfTime = (startTime + currentTime) / 2;
+   halfTime = (selectLeftTime + currentTime) / 2;
+   //halfTime = (startTime + currentTime) / 2;
+   
    halfCalendar = new GregorianCalendar();
    halfCalendar.setTimeInMillis(halfTime);
   
@@ -565,20 +559,28 @@ void setSelectLeftTimeStamp(int selectLeft)
    int hourInt = 0;
    int minuteInt = 0;
    int secondInt = 0;
+   int fullRange = 0;
+   double leftRatio = 0.0;
+   long fullTime = 0;
    
-   if (selectLeft == 0)
-   {
+   //if ((selectLeft == 0) || (dataNumber < 3))
+   if (selectLeft <= selectRangeLeft)
+    {
      selectLeftDataNumber = 1;
      selectLeftTime = startTime;
    }
    else
    {
-     selectLeftDataNumber = round(map(selectLeft, selectRangeLeft, selectRangeRight, 1, dataNumber - 1));
-     selectLeftTime = round(map(selectLeft, selectRangeLeft, selectRangeRight, startTime, currentTime));
-     //selectLeftTime = (startTime + currentTime) / 2;
+     selectLeftDataNumber = round(map(selectLeft, selectRangeLeft, selectRangeRight, 1, dataNumber - 1)); //<>//
+     fullRange = selectRangeRight - selectRangeLeft;
+     leftRatio = selectLeft/((double)fullRange);
+     fullTime = currentTime - startTime;
+     selectLeftTime = (long)(fullTime * leftRatio); //<>//
+     selectLeftTime = startTime + selectLeftTime;
+     //selectLeftTime = round((selectLeft, selectRangeLeft, selectRangeRight, startTime, currentTime));  
    }
   
-   selectLeftCalendar = new GregorianCalendar();
+   selectLeftCalendar = new GregorianCalendar(); //<>//
    selectLeftCalendar.setTimeInMillis(selectLeftTime);
   
    yearInt = selectLeftCalendar.get(Calendar.YEAR);
