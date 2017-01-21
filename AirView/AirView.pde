@@ -42,10 +42,12 @@
 // 2017-01-20 17:10 UTC+8 AirView V3.2.2 Select Range for the left
 // 2017-01-20 17:36 UTC+8 AirView V3.2.3 Fix left time stamp
 // 2017-01-20 22:54 UTC+8 AirView V3.2.4 Fix setSelectLeftTimeStamp() map() bug: don't use it with long
+// 2017-01-21 12:51 UTC+8 AirView V3.2.5 Fix setSelectLeftTimeStamp() left range bug
+
 
 import java.util.*;
 import processing.serial.*;
-String titleString = "AirView V3.2.4";
+String titleString = "AirView V3.2.5";
 
 GregorianCalendar startCalendar = null;
 long startTime = 0;
@@ -114,7 +116,7 @@ void setup()
   openSerialPort();
   setStartTimeStamp();
   setCurrentTimeStamp();
-  setSelectLeftTimeStamp(0);
+  setSelectLeftTimeStamp();
 }
 
 
@@ -156,16 +158,18 @@ void draw()
   {
     selectLeft = selectRangeLeft;
   }
-  
-  if (selectLeft > selectRangeRight - 3)
+  else
   {
-    selectLeft = selectRangeRight - 3;
+    if (selectLeft > selectRangeRight - 10)
+    {
+      selectLeft = selectRangeRight - 10;
+    }
   }
 
 
   setCurrentTimeStamp();
   plotSelectRange();
-  plotAxes();
+  //plotAxes();
   
   detectMouse();
   
@@ -253,9 +257,9 @@ void detectMouse()
       x = selectRangeLeft;
     }
     
-    if (x > selectRangeRight - 50)
+    if (x > selectRangeRight - 10)
     {
-      x = selectRangeRight - 50;
+      x = selectRangeRight - 10;
     }
        
     line(x, selectRangeBottom, x, selectRangeTop);
@@ -272,16 +276,14 @@ void detectMouse()
       }
       else 
       {
-        if (selectLeft > selectRangeRight - 50)
+        if (selectLeft > selectRangeRight - 10)
         {
-          selectLeft = selectRangeRight - 50;
+          selectLeft = selectRangeRight - 10;
         }
       }
       
-      //if (selectLeft >= selectRangeLeft) 
-      //{
-      setSelectLeftTimeStamp(selectLeft);
-      //}
+      setSelectLeftTimeStamp();
+      // setSelectLeftTimeStamp(selectLeft);
     }
   }
 }
@@ -551,7 +553,8 @@ void setCurrentTimeStamp()
 }
 
 
-void setSelectLeftTimeStamp(int selectLeft)
+void setSelectLeftTimeStamp()
+//void setSelectLeftTimeStamp(int selectLeft)
 {
    int yearInt = 0;
    int monthInt = 0;
@@ -560,20 +563,29 @@ void setSelectLeftTimeStamp(int selectLeft)
    int minuteInt = 0;
    int secondInt = 0;
    int fullRange = 0;
+   int selectLeftRange = 0;
    double leftRatio = 0.0;
    long fullTime = 0;
    
    //if ((selectLeft == 0) || (dataNumber < 3))
    if (selectLeft <= selectRangeLeft)
-    {
-     selectLeftDataNumber = 1;
-     selectLeftTime = startTime;
+   {
+      selectLeft = selectRangeLeft;
+      selectLeftDataNumber = 1;
+      selectLeftTime = startTime;
    }
    else
    {
+     if (selectLeft > selectRangeRight - 10)
+     {
+       selectLeft = selectRangeRight - 10;
+     }
+     
      selectLeftDataNumber = round(map(selectLeft, selectRangeLeft, selectRangeRight, 1, dataNumber - 1)); //<>//
      fullRange = selectRangeRight - selectRangeLeft;
-     leftRatio = selectLeft/((double)fullRange);
+     selectLeftRange = selectLeft - selectRangeLeft;
+     leftRatio = selectLeftRange/((double)fullRange);
+     //leftRatio = selectLeft/((double)fullRange);
      fullTime = currentTime - startTime;
      selectLeftTime = (long)(fullTime * leftRatio); //<>//
      selectLeftTime = startTime + selectLeftTime;
