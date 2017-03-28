@@ -43,7 +43,7 @@
 // 2017-01-20 17:36 UTC+8 AirView V3.2.3 Fix left time stamp
 // 2017-01-20 22:54 UTC+8 AirView V3.2.4 Fix setSelectLeftTimeStamp() map() bug: don't use it with long
 // 2017-01-21 12:51 UTC+8 AirView V3.2.5 Fix setSelectLeftTimeStamp() left range bug
-
+// 2017-01-26 00:09 UTC+8 AirView V3.2.6 PlotQuarterY()
 
 import java.util.*;
 import processing.serial.*;
